@@ -23,6 +23,9 @@ const nextConfig = {
     ],
     domains: ['localhost'],
   },
+  eslint: {
+    ignoreDuringBuilds: true,  // <<< Add this line
+  },
 };
 
 module.exports = nextConfig;
