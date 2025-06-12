@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 interface User {
   id: string;
@@ -26,13 +26,25 @@ export default function AdminProfile() {
   const router = useRouter();
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
-  const token = document.cookie
-    .split('; ')
-    .find((row) => row.startsWith('accessToken='))
-    ?.split('=')[1];
+
+  // Get token safely
+  const getToken = () => {
+    if (typeof window === 'undefined') return undefined;
+    return document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('accessToken='))
+      ?.split('=')[1];
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
+      const token = getToken();
+      if (!token) {
+        setError('No authentication token found');
+        router.push('/login');
+        return;
+      }
+
       try {
         const res = await axios.get(`${API_URL}/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -45,14 +57,20 @@ export default function AdminProfile() {
           password: '',
           gender: res.data.gender || '',
         });
-      } catch (err) {
-        setError('Failed to load profile');
+      } catch (err: unknown) {
+        if (err instanceof AxiosError) {
+          console.error('Error fetching profile:', err.message, err.response?.data);
+          setError(err.response?.data?.message || 'Failed to load profile');
+        } else {
+          console.error('Error fetching profile:', err);
+          setError('An unexpected error occurred');
+        }
         router.push('/login');
       }
     };
 
     fetchProfile();
-  }, [router, token]);
+  }, [router, API_URL]); // Added API_URL to dependencies
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setUpdateData({ ...updateData, [e.target.name]: e.target.value });
@@ -60,6 +78,13 @@ export default function AdminProfile() {
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    const token = getToken();
+    if (!token) {
+      setError('No authentication token found');
+      router.push('/login');
+      return;
+    }
+
     try {
       await axios.post(`${API_URL}/users/profile`, updateData, {
         headers: { Authorization: `Bearer ${token}` },
@@ -77,9 +102,14 @@ export default function AdminProfile() {
         gender: res.data.gender || '',
       });
       alert('Profile updated successfully');
-    } catch (err) {
-      setError('Failed to update profile');
-      console.error('Update error:', err);
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error updating profile:', err.message, err.response?.data);
+        setError(err.response?.data?.message || 'Failed to update profile');
+      } else {
+        console.error('Error updating profile:', err);
+        setError('An unexpected error occurred');
+      }
     }
   };
 

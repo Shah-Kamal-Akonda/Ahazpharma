@@ -2,7 +2,7 @@
 
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useState } from 'react';
 import Link from 'next/link';
 
@@ -72,9 +72,14 @@ export default function LoginPage() {
         document.cookie = `accessToken=${accessToken}; path=/; max-age=3600; SameSite=Strict`;
       }
       router.push('/');
-    } catch (error: any) {
-      console.error('LoginPage: Error:', error.response?.data || error.message);
-      setErrorMessage(error.response?.data?.message || 'Login failed. Please try again.');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('LoginPage: Error:', err.response?.data || err.message);
+        setErrorMessage(err.response?.data?.message || 'Login failed. Please try again.');
+      } else {
+        console.error('LoginPage: Error:', err);
+        setErrorMessage('An unexpected error occurred.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -88,9 +93,14 @@ export default function LoginPage() {
       await axios.post(`${API_URL}/users/send-reset-code`, { email: data.email });
       setForgotEmail(data.email);
       setStep('verify');
-    } catch (error: any) {
-      console.error('LoginPage: Send reset code error:', error.response?.data || error.message);
-      setErrorMessage(error.response?.data?.message || 'Failed to send verification code. Please try again.');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('LoginPage: Send reset code error:', err.response?.data || err.message);
+        setErrorMessage(err.response?.data?.message || 'Failed to send verification code. Please try again.');
+      } else {
+        console.error('LoginPage: Send reset code error:', err);
+        setErrorMessage('An unexpected error occurred.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -107,9 +117,14 @@ export default function LoginPage() {
       });
       setResetCode(data.code);
       setStep('reset');
-    } catch (error: any) {
-      console.error('LoginPage: Verify error:', error.response?.data || error.message);
-      setErrorMessage(error.response?.data?.message || 'Invalid or expired verification code.');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('LoginPage: Verify error:', err.response?.data || err.message);
+        setErrorMessage(err.response?.data?.message || 'Invalid or expired verification code.');
+      } else {
+        console.error('LoginPage: Verify error:', err);
+        setErrorMessage('An unexpected error occurred.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -131,9 +146,14 @@ export default function LoginPage() {
         setForgotEmail('');
         setResetCode('');
       }, 3000);
-    } catch (error: any) {
-      console.error('LoginPage: Reset password error:', error.response?.data || error.message);
-      setErrorMessage(error.response?.data?.message || 'Failed to reset password. Please try again.');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('LoginPage: Reset password error:', err.response?.data || err.message);
+        setErrorMessage(err.response?.data?.message || 'Failed to reset password. Please try again.');
+      } else {
+        console.error('LoginPage: Reset password error:', err);
+        setErrorMessage('An unexpected error occurred.');
+      }
     } finally {
       setIsLoading(false);
     }

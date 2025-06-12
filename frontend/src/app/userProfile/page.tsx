@@ -1,11 +1,8 @@
-// pages/profile.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
-
-
+import axios, { AxiosError } from 'axios';
 
 interface User {
   id: string;
@@ -54,13 +51,25 @@ export default function UserProfile() {
   const router = useRouter();
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
-  const token = document.cookie
-    .split('; ')
-    .find((row) => row.startsWith('accessToken='))
-    ?.split('=')[1];
+
+  // Get token safely
+  const getToken = () => {
+    if (typeof window === 'undefined') return undefined;
+    return document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('accessToken='))
+      ?.split('=')[1];
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
+      const token = getToken();
+      if (!token) {
+        setError('No authentication token found');
+        router.push('/login');
+        return;
+      }
+
       try {
         const res = await axios.get(`${API_URL}/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -73,8 +82,14 @@ export default function UserProfile() {
           password: '',
           gender: res.data.gender || '',
         });
-      } catch (err) {
-        setError('Failed to load profile');
+      } catch (err: unknown) {
+        if (err instanceof AxiosError) {
+          console.error('Error fetching profile:', err.message, err.response?.data);
+          setError(err.response?.data?.message || 'Failed to load profile');
+        } else {
+          console.error('Error fetching profile:', err);
+          setError('An unexpected error occurred');
+        }
         router.push('/login');
       }
     };
@@ -83,14 +98,20 @@ export default function UserProfile() {
       try {
         const res = await axios.get(`${API_URL}/users/divisions`);
         setDivisions(res.data);
-      } catch (err) {
-        setError('Failed to load divisions');
+      } catch (err: unknown) {
+        if (err instanceof AxiosError) {
+          console.error('Error fetching divisions:', err.message, err.response?.data);
+          setError(err.response?.data?.message || 'Failed to load divisions');
+        } else {
+          console.error('Error fetching divisions:', err);
+          setError('An unexpected error occurred');
+        }
       }
     };
 
     fetchProfile();
     fetchDivisions();
-  }, [router, token]);
+  }, [router, API_URL]); // Added API_URL to dependencies
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setUpdateData({ ...updateData, [e.target.name]: e.target.value });
@@ -98,6 +119,13 @@ export default function UserProfile() {
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    const token = getToken();
+    if (!token) {
+      setError('No authentication token found');
+      router.push('/login');
+      return;
+    }
+
     try {
       await axios.post(`${API_URL}/users/profile`, updateData, {
         headers: { Authorization: `Bearer ${token}` },
@@ -115,9 +143,14 @@ export default function UserProfile() {
         gender: res.data.gender || '',
       });
       alert('Profile updated successfully');
-    } catch (err) {
-      setError('Failed to update profile');
-      console.error('Update error:', err);
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error updating profile:', err.message, err.response?.data);
+        setError(err.response?.data?.message || 'Failed to update profile');
+      } else {
+        console.error('Error updating profile:', err);
+        setError('An unexpected error occurred');
+      }
     }
   };
 
@@ -140,8 +173,14 @@ export default function UserProfile() {
     try {
       const res = await axios.get(`${API_URL}/users/districts/${division}`);
       setDistricts(res.data);
-    } catch (err) {
-      setError('Failed to load districts');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error fetching districts:', err.message, err.response?.data);
+        setError(err.response?.data?.message || 'Failed to load districts');
+      } else {
+        console.error('Error fetching districts:', err);
+        setError('An unexpected error occurred');
+      }
     }
   };
 
@@ -149,21 +188,51 @@ export default function UserProfile() {
     try {
       const res = await axios.get(`${API_URL}/users/cities/${division}/${district}`);
       setCities(res.data);
-    } catch (err) {
-      setError('Failed to load cities');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error fetching cities:', err.message, err.response?.data);
+        setError(err.response?.data?.message || 'Failed to load cities');
+      } else {
+        console.error('Error fetching cities:', err);
+        setError('An unexpected error occurred');
+      }
     }
   };
 
   const handleCreateAddress = async (e: React.FormEvent) => {
     e.preventDefault();
+    const token = getToken();
+    if (!token) {
+      setError('No authentication token found');
+      router.push('/login');
+      return;
+    }
+
     try {
-      await axios.post(`${API_URL}/users/address`, newAddress, {
+      const response = await axios.post(`${API_URL}/users/address`, newAddress, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      setUser((prev) =>
+        prev ? { ...prev, addresses: [...prev.addresses, response.data] } : prev,
+      );
+      setNewAddress({
+        division: '',
+        district: '',
+        city: '',
+        addressLine: '',
+        recipientName: '',
+        phoneNumber: '',
+        email: '',
+      });
       alert('Address created successfully');
-      window.location.reload();
-    } catch (err) {
-      setError('Failed to create address');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error creating address:', err.message, err.response?.data);
+        setError(err.response?.data?.message || 'Failed to create address');
+      } else {
+        console.error('Error creating address:', err);
+        setError('An unexpected error occurred');
+      }
     }
   };
 
@@ -177,27 +246,73 @@ export default function UserProfile() {
   const handleUpdateAddress = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingAddress) return;
+    const token = getToken();
+    if (!token) {
+      setError('No authentication token found');
+      router.push('/login');
+      return;
+    }
+
     try {
       await axios.put(`${API_URL}/users/address/${editingAddress.id}`, newAddress, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      alert('Address updated successfully');
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              addresses: prev.addresses.map((addr) =>
+                addr.id === editingAddress.id ? { ...newAddress, id: editingAddress.id } : addr,
+              ),
+            }
+          : prev,
+      );
       setEditingAddress(null);
-      window.location.reload();
-    } catch (err) {
-      setError('Failed to update address');
+      setNewAddress({
+        division: '',
+        district: '',
+        city: '',
+        addressLine: '',
+        recipientName: '',
+        phoneNumber: '',
+        email: '',
+      });
+      alert('Address updated successfully');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error updating address:', err.message, err.response?.data);
+        setError(err.response?.data?.message || 'Failed to update address');
+      } else {
+        console.error('Error updating address:', err);
+        setError('An unexpected error occurred');
+      }
     }
   };
 
   const handleDeleteAddress = async (addressId: string) => {
+    const token = getToken();
+    if (!token) {
+      setError('No authentication token found');
+      router.push('/login');
+      return;
+    }
+
     try {
       await axios.delete(`${API_URL}/users/address/${addressId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      setUser((prev) =>
+        prev ? { ...prev, addresses: prev.addresses.filter((addr) => addr.id !== addressId) } : prev,
+      );
       alert('Address deleted successfully');
-      window.location.reload();
-    } catch (err) {
-      setError('Failed to delete address');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error deleting address:', err.message, err.response?.data);
+        setError(err.response?.data?.message || 'Failed to delete address');
+      } else {
+        console.error('Error deleting address:', err);
+        setError('An unexpected error occurred');
+      }
     }
   };
 
@@ -370,15 +485,26 @@ export default function UserProfile() {
           </div>
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800"
           >
-            {editingAddress ? 'Update Address' : 'Add Address'}
+            {editingAddress ? 'Update Address' : 'Create Address'}
           </button>
           {editingAddress && (
             <button
               type="button"
-              onClick={() => setEditingAddress(null)}
-              className="ml-4 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+              onClick={() => {
+                setEditingAddress(null);
+                setNewAddress({
+                  division: '',
+                  district: '',
+                  city: '',
+                  addressLine: '',
+                  recipientName: '',
+                  phoneNumber: '',
+                  email: '',
+                });
+              }}
+              className="ms-4 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
             >
               Cancel
             </button>
@@ -386,28 +512,32 @@ export default function UserProfile() {
         </form>
         <div className="mt-6">
           <h3 className="text-xl font-semibold mb-2">Saved Addresses</h3>
-          {user.addresses.map((address) => (
-            <div key={address.id} className="border p-4 mb-2 rounded">
-              <p><strong>Recipient:</strong> {address.recipientName}</p>
-              <p><strong>Address:</strong> {address.addressLine}, {address.city}, {address.district}, {address.division}</p>
-              <p><strong>Phone:</strong> {address.phoneNumber}</p>
-              <p><strong>Email:</strong> {address.email}</p>
-              <div className="mt-2">
-                <button
-                  onClick={() => handleEditAddress(address)}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded mr-2"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDeleteAddress(address.id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded"
-                >
-                  Delete
-                </button>
+          {user.addresses.length === 0 ? (
+            <p className="text-gray-600">No addresses saved.</p>
+          ) : (
+            user.addresses.map((address) => (
+              <div key={address.id} className="border p-4 mb-2 rounded">
+                <p><strong>Recipient:</strong> {address.recipientName}</p>
+                <p><strong>Address:</strong> {address.addressLine}, {address.city}, {address.district}, {address.division}</p>
+                <p><strong>Phone:</strong> {address.phoneNumber}</p>
+                <p><strong>Email:</strong> {address.email}</p>
+                <div className="mt-2 space-x-2">
+                  <button
+                    onClick={() => handleEditAddress(address)}
+                    className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteAddress(address.id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>

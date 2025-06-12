@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import CartSlider from '@/app/components/CartSlider';
@@ -35,6 +35,30 @@ const CategoryProductsPage = () => {
       : undefined;
   };
 
+  // Fetch addresses
+  const fetchAddresses = async () => {
+    try {
+      const token = getAccessToken();
+      if (!token) return;
+      const response = await axios.get(`${API_URL}/orders/addresses`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log('Fetched addresses:', response.data); // Debug log
+      setAddresses(response.data);
+      if (response.data.length > 0) {
+        setSelectedAddress(response.data[0]);
+      }
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error fetching addresses:', err.message, err.response?.data);
+        setAddresses([]);
+      } else {
+        console.error('Error fetching addresses:', err);
+        setAddresses([]);
+      }
+    }
+  };
+
   // Load cart from localStorage on mount
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
@@ -48,6 +72,7 @@ const CategoryProductsPage = () => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
+  // Fetch category products, name, and addresses
   useEffect(() => {
     if (id) {
       fetchCategoryProducts(Number(id));
@@ -57,15 +82,20 @@ const CategoryProductsPage = () => {
         fetchAddresses();
       }
     }
-  }, [id]);
+  }, [id, fetchAddresses]); // fetchAddresses is now declared before use
 
   const fetchCategoryProducts = async (categoryId: number) => {
     try {
       const response = await axios.get(`${API_URL}/products/category/${categoryId}`);
       setProducts(response.data);
-    } catch (error: any) {
-      console.error('Error fetching category products:', error.message, error.response?.data);
-      setErrorMessage('Failed to fetch products. Please try again.');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error fetching category products:', err.message, err.response?.data);
+        setErrorMessage('Failed to fetch products. Please try again.');
+      } else {
+        console.error('Error fetching category products:', err);
+        setErrorMessage('An unexpected error occurred.');
+      }
     }
   };
 
@@ -73,27 +103,14 @@ const CategoryProductsPage = () => {
     try {
       const response = await axios.get(`${API_URL}/categories/${categoryId}`);
       setCategoryName(response.data.name);
-    } catch (error: any) {
-      console.error('Error fetching category name:', error.message, error.response?.data);
-      setErrorMessage('Failed to fetch category details. Please try again.');
-    }
-  };
-
-  const fetchAddresses = async () => {
-    try {
-      const token = getAccessToken();
-      if (!token) return;
-      const response = await axios.get(`${API_URL}/orders/addresses`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log('Fetched addresses:', response.data); // Debug log
-      setAddresses(response.data);
-      if (response.data.length > 0) {
-        setSelectedAddress(response.data[0]);
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error fetching category name:', err.message, err.response?.data);
+        setErrorMessage('Failed to fetch category details. Please try again.');
+      } else {
+        console.error('Error fetching category name:', err);
+        setErrorMessage('An unexpected error occurred.');
       }
-    } catch (error: any) {
-      console.error('Error fetching addresses:', error.message, error.response?.data);
-      setAddresses([]);
     }
   };
 
@@ -143,8 +160,7 @@ const CategoryProductsPage = () => {
       return;
     }
     if (!selectedAddress) {
-    //   setIsAddressModalOpen(true);
-    alert('You should fill up the address form first.');
+      alert('You should fill up the address form first.');
       router.push('/userProfile');
     } else {
       setIsOrderModalOpen(true);
@@ -175,9 +191,14 @@ const CategoryProductsPage = () => {
       setSelectedAddress(response.data);
       setIsAddressModalOpen(false);
       setIsOrderModalOpen(true);
-    } catch (error: any) {
-      console.error('Error saving address:', error.message, error.response?.data);
-      setErrorMessage('Failed to save address. Please try again.');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error saving address:', err.message, err.response?.data);
+        setErrorMessage('Failed to save address. Please try again.');
+      } else {
+        console.error('Error saving address:', err);
+        setErrorMessage('An unexpected error occurred.');
+      }
     }
   };
 
@@ -212,9 +233,14 @@ const CategoryProductsPage = () => {
       localStorage.removeItem('cart');
       await new Promise((resolve) => setTimeout(resolve, 2000)); // Delay for backend sync
       router.push(`/orders/${response.data.id}`);
-    } catch (error: any) {
-      console.error('Error creating order:', error.message, error.response?.data);
-      setErrorMessage(error.response?.data?.message || 'Failed to create order. Please try again.');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error creating order:', err.message, err.response?.data);
+        setErrorMessage(err.response?.data?.message || 'Failed to create order. Please try again.');
+      } else {
+        console.error('Error creating order:', err);
+        setErrorMessage('An unexpected error occurred.');
+      }
     }
   };
 

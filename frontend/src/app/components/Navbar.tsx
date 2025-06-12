@@ -18,70 +18,70 @@ export default function Navbar() {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
-  useEffect(() => {
-    const accessToken = typeof window !== 'undefined'
-      ? document.cookie
-          .split('; ')
-          .find((row) => row.startsWith('accessToken='))
-          ?.split('=')[1]
-      : undefined;
+ useEffect(() => {
+  const accessToken = typeof window !== 'undefined'
+    ? document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('accessToken='))
+        ?.split('=')[1]
+    : undefined;
 
-    setToken(accessToken);
+  setToken(accessToken);
 
-    if (pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname.startsWith('/products')) {
-      if (accessToken) {
-        const fetchUser = async () => {
-          try {
-            const res = await axios.get(`${API_URL}/users/me`, {
-              headers: { Authorization: `Bearer ${accessToken}` },
-            });
-            setUserEmail(res.data.email);
-          } catch (err) {
-            console.error('Failed to fetch user:', err);
-            document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-            setToken(undefined);
-          } finally {
-            setIsLoading(false);
-          }
-        };
-        fetchUser();
-      } else {
-        setIsLoading(false);
-      }
-      return;
-    }
-
-    if (pathname === '/adminPannel') {
-      const hasAdminAccess = sessionStorage.getItem('adminAccess') === 'true';
-      if (!hasAdminAccess) {
-        console.log('Navbar: Unauthorized access to /adminPannel, redirecting to /login');
-        router.push('/login');
-        return;
-      }
-    }
-
-    if (!accessToken) {
+  if (pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname.startsWith('/products')) {
+    if (accessToken) {
+      const fetchUser = async () => {
+        try {
+          const res = await axios.get(`${API_URL}/users/me`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+          setUserEmail(res.data.email);
+        } catch (err) {
+          console.error('Failed to fetch user:', err);
+          document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          setToken(undefined);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchUser();
+    } else {
       setIsLoading(false);
+    }
+    return;
+  }
+
+  if (pathname === '/adminPannel') {
+    const hasAdminAccess = sessionStorage.getItem('adminAccess') === 'true';
+    if (!hasAdminAccess) {
+      console.log('Navbar: Unauthorized access to /adminPannel, redirecting to /login');
       router.push('/login');
       return;
     }
+  }
 
-    const fetchUser = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/users/me`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        setUserEmail(res.data.email);
-      } catch (err) {
-        console.error('Failed to fetch user:', err);
-        router.push('/login');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  if (!accessToken) {
+    setIsLoading(false);
+    router.push('/login');
+    return;
+  }
 
-    fetchUser();
-  }, [pathname, router]);
+  const fetchUser = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      setUserEmail(res.data.email);
+    } catch (err) {
+      console.error('Failed to fetch user:', err);
+      router.push('/login');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchUser();
+}, [pathname, router, API_URL]); // Added API_URL to the dependency array
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
@@ -136,7 +136,7 @@ export default function Navbar() {
     <nav className="bg-white text-black  p-4 shadow-md mt-4  rounded-lg ">
       <div className="container mx-auto flex justify-between items-center ">
         {/* Logo */}
-        <Link href="/products" className="text-2xl font-bold text-blue-600">
+        <Link href="/" className="text-2xl font-bold text-blue-600">
           Ahaz Pharma
         </Link>
 

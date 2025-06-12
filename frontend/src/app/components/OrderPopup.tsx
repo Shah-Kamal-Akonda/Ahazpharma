@@ -20,17 +20,19 @@ const OrderPopup: React.FC<OrderPopupProps> = ({ cart, address, onConfirm, onClo
   const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   // START MODIFIED
-  const handleConfirm = async () => {
-    try {
-      setIsProcessing(true);
-      await onConfirm(); // 🔄 Just call onConfirm (which calls backend)
-      setIsSuccess(true);
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Something went wrong');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+const handleConfirm = async () => {
+  try {
+    setIsProcessing(true);
+    await onConfirm();
+    setIsSuccess(true);
+  } catch (err: unknown) { // Use 'unknown' instead of 'any' or 'Error'
+    // Narrow the type to Error
+    const error = err as Error; // Type assertion
+    setErrorMessage(error.message || 'Something went wrong');
+  } finally {
+    setIsProcessing(false);
+  }
+};
   // END MODIFIED
 
   return (

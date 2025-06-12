@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 interface Order {
@@ -23,7 +22,6 @@ interface Order {
 const OrderSummaryPage = ({ params }: { params: { id: string } }) => {
   const [order, setOrder] = useState<Order | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     const storedOrder = localStorage.getItem('lastOrder');

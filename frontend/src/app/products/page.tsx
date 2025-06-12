@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import CartSlider from '../components/CartSlider';
 import AddressForm from '../components/AddressForm';
 import OrderPopup from '../components/OrderPopup';
-// const router =useRouter();
 
 interface Category {
   id: number;
@@ -96,9 +95,14 @@ const ProductsPage = () => {
     try {
       const response = await axios.get(`${API_URL}/categories`);
       setCategories(response.data);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      setErrorMessage('Failed to fetch categories. Please try again.');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error fetching categories:', err.message, err.response?.data);
+        setErrorMessage('Failed to fetch categories. Please try again.');
+      } else {
+        console.error('Error fetching categories:', err);
+        setErrorMessage('An unexpected error occurred.');
+      }
     }
   };
 
@@ -107,9 +111,14 @@ const ProductsPage = () => {
       const response = await axios.get(`${API_URL}/products`);
       const products = response.data.filter((product: Product) => !product.categoryId);
       setUncategorizedProducts(products);
-    } catch (error) {
-      console.error('Error fetching uncategorized products:', error);
-      setErrorMessage('Failed to fetch uncategorized products. Please try again.');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error fetching uncategorized products:', err.message, err.response?.data);
+        setErrorMessage('Failed to fetch uncategorized products. Please try again.');
+      } else {
+        console.error('Error fetching uncategorized products:', err);
+        setErrorMessage('An unexpected error occurred.');
+      }
     }
   };
 
@@ -122,9 +131,14 @@ const ProductsPage = () => {
       if (response.data.length > 0) {
         setSelectedAddress(response.data[0]);
       }
-    } catch (error) {
-      console.error('Error fetching addresses:', error);
-      setAddresses([]);
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error retrieving addresses:', err.message, err.response?.data);
+        setErrorMessage('Failed to retrieve addresses. Please try again.');
+      } else {
+        console.error('Error retrieving addresses:', err);
+        setErrorMessage('An unexpected error occurred.');
+      }
     }
   };
 
@@ -158,6 +172,7 @@ const ProductsPage = () => {
 
   const handleOrderNow = () => {
     const token = getAccessToken();
+    console.log('handleOrderNow: token=', token); // Debug logging for token verification
     if (!token) {
       setIsLoginPopupOpen(true);
       setTimeout(() => {
@@ -171,8 +186,7 @@ const ProductsPage = () => {
       return;
     }
     if (addresses.length === 0) {
-    //   setIsAddressModalOpen(true);
-    alert('You should fill up the address form first.');
+      alert('You must complete the address form first.');
       router.push('/userProfile');
     } else {
       setIsOrderModalOpen(true);
@@ -202,9 +216,14 @@ const ProductsPage = () => {
       setSelectedAddress(response.data);
       setIsAddressModalOpen(false);
       setIsOrderModalOpen(true);
-    } catch (error) {
-      console.error('Error saving address:', error);
-      setErrorMessage('Failed to save address. Please try again.');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error saving address:', err.message, err.response?.data);
+        setErrorMessage('Failed to save address. Please try again.');
+      } else {
+        console.error('Error saving address:', err);
+        setErrorMessage('An unexpected error occurred.');
+      }
     }
   };
 
@@ -236,35 +255,40 @@ const ProductsPage = () => {
       localStorage.removeItem('cart');
       await new Promise((resolve) => setTimeout(resolve, 2000)); // Delay for backend sync
       router.push(`/orders/${response.data.id}`);
-    } catch (error: any) {
-      console.error('Error creating order:', error.message, error.response?.data);
-      setErrorMessage(error.response?.data?.message || 'Failed to create order. Please try again.');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error creating order:', err.message, err.response?.data);
+        setErrorMessage(err.response?.data?.message || 'Failed to create order.');
+      } else {
+        console.error('Error creating order:', err);
+        setErrorMessage('An unexpected error occurred.');
+      }
     }
   };
 
   return (
     <div className={`min-h-screen bg-gray-100 p-6 transition-all duration-300 ${isCartOpen ? 'sm:pr-80' : ''}`}>
-      <h1 className="text-3xl font-bold text-center mb-8">Products</h1>
+      <h1 className="text-3xl font-bold text-center mb-8">Product Catalog</h1>
 
       {errorMessage && (
-        <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-md">{errorMessage}</div>
+        <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">{errorMessage}</div>
       )}
 
       {isLoginPopupOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <p className="text-lg text-center">For purchase, you should login first</p>
+            <p className="text-lg text-center">Please log in to complete your purchase.</p>
           </div>
         </div>
       )}
 
       <div className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4">Shop by Category</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <h2 className="text-2xl font-semibold mb-4">Browse by Category</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {categories.map((category) => (
             <Link key={category.id} href={`/products/category/${category.id}`} className="block">
-              <div className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <h3 className="text-lg font-semibold">{category.name}</h3>
+              <div className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
+                <h3 className="text-lg font-semibold text-gray-800">{category.name}</h3>
                 {category.image && (
                   <Image
                     src={`${API_URL}${category.image}`}
@@ -283,15 +307,15 @@ const ProductsPage = () => {
 
       {uncategorizedProducts.length > 0 && (
         <div className="mb-12">
-          <h2 className="text-2xl font-semibold mb-4">AhazPharma Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <h2 className="text-2xl font-semibold mb-4">Featured Products</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {uncategorizedProducts.map((product) => {
               const cartItem = cart.find((item) => item.product.id === product.id);
               return (
-                <div key={product.id} className="bg-white p-2 rounded-lg shadow-md">
-                  <h3 className="text-lg font-semibold">{product.name}</h3>
+                <div key={product.id} className="bg-white p-4 rounded-lg shadow-md">
+                  <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
                   <p className="text-gray-600">{product.description}</p>
-                  <p className="text-gray-600">Price: ${product.price}</p>
+                  <p className="text-gray-600">Price: ${product.price.toFixed(2)}</p>
                   <p className="text-gray-600">
                     Quantity: {product.quantity} {product.quantityUnit}
                   </p>
@@ -309,16 +333,16 @@ const ProductsPage = () => {
                       <>
                         <button
                           onClick={() => updateCartQuantity(product.id, -1)}
-                          className="bg-gray-300 text-gray-700 px-2 py-1 rounded-md hover:bg-gray-400"
+                          className="bg-gray-300 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-400 transition"
                         >
                           -
                         </button>
-                        <span className="bg-blue-500 text-white px-1 py-1 rounded-md">
+                        <span className="bg-blue-500 text-white px-3 py-1 rounded-md">
                           {cartItem.quantity} in Cart
                         </span>
                         <button
                           onClick={() => updateCartQuantity(product.id, 1)}
-                          className="bg-gray-300 text-gray-700 px-2 py-1 rounded-md hover:bg-gray-400"
+                          className="bg-gray-300 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-400 transition"
                         >
                           +
                         </button>
@@ -326,7 +350,7 @@ const ProductsPage = () => {
                     ) : (
                       <button
                         onClick={() => addToCart(product)}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
                       >
                         Add to Cart
                       </button>

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -17,7 +17,7 @@ interface VerifyForm {
   code: string;
 }
 
-const API_URL = 'http://localhost:5001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
 const SignupPage = () => {
   const [isVerifying, setIsVerifying] = useState(false);
@@ -40,9 +40,14 @@ const SignupPage = () => {
       setEmail(data.email);
       setIsVerifying(true);
       setErrorMessage(null);
-    } catch (error: any) {
-      console.error('SignupPage: Error:', error.response?.data || error.message);
-      setErrorMessage(error.response?.data?.message || 'Failed to sign up. Please try again.');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('SignupPage: Error:', err.response?.data || err.message);
+        setErrorMessage(err.response?.data?.message || 'Failed to sign up. Please try again.');
+      } else {
+        console.error('SignupPage: Error:', err);
+        setErrorMessage('An unexpected error occurred.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -64,9 +69,14 @@ const SignupPage = () => {
         setShowSuccessPopup(false);
         router.push('/login');
       }, 3000);
-    } catch (error: any) {
-      console.error('SignupPage: Verify error:', error.response?.data || error.message);
-      setErrorMessage(error.response?.data?.message || 'Invalid verification code.');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('SignupPage: Verify error:', err.response?.data || err.message);
+        setErrorMessage(err.response?.data?.message || 'Invalid verification code.');
+      } else {
+        console.error('SignupPage: Verify error:', err);
+        setErrorMessage('An unexpected error occurred.');
+      }
     } finally {
       setIsLoading(false);
     }
