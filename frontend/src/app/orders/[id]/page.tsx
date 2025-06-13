@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import type { NextPage } from 'next';
 
 // Define the Order interface consistent with original code
 interface Order {
@@ -19,12 +20,12 @@ interface Order {
   createdAt: string;
 }
 
-// Define props type for dynamic route
-interface OrderPageProps {
+// Define props type for dynamic route using NextPage
+type OrderPageProps = {
   params: { id: string };
-}
+};
 
-export default function OrderSummaryPage({ params }: OrderPageProps) {
+const OrderSummaryPage: NextPage<OrderPageProps> = ({ params }) => {
   const [order, setOrder] = useState<Order | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -147,4 +148,6 @@ export default function OrderSummaryPage({ params }: OrderPageProps) {
       </div>
     </div>
   );
-}
+};
+
+export default OrderSummaryPage;
