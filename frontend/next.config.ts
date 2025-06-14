@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // ✅ Allow loading images from backend server (localhost in dev)
   images: {
     remotePatterns: [
       {
@@ -21,10 +22,12 @@ const nextConfig = {
         pathname: '/Uploads/*/**',
       },
     ],
-    domains: ['localhost'],
+    domains: ['localhost'], // ✅ Still required for legacy support
   },
+
+  // ✅ Prevent ESLint errors from failing the build on Vercel
   eslint: {
-    ignoreDuringBuilds: true,  // <<< Add this line
+    ignoreDuringBuilds: true, // 👈 Added by ChatGPT to avoid ESLint build errors in Vercel
   },
 };
 
