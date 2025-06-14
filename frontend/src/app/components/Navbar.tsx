@@ -18,70 +18,70 @@ export default function Navbar() {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
- useEffect(() => {
-  const accessToken = typeof window !== 'undefined'
-    ? document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('accessToken='))
-        ?.split('=')[1]
-    : undefined;
+  useEffect(() => {
+    const accessToken = typeof window !== 'undefined'
+      ? document.cookie
+          .split('; ')
+          .find((row) => row.startsWith('accessToken='))
+          ?.split('=')[1]
+      : undefined;
 
-  setToken(accessToken);
+    setToken(accessToken);
 
-  if (pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname.startsWith('/products')) {
-    if (accessToken) {
-      const fetchUser = async () => {
-        try {
-          const res = await axios.get(`${API_URL}/users/me`, {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          });
-          setUserEmail(res.data.email);
-        } catch (err) {
-          console.error('Failed to fetch user:', err);
-          document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-          setToken(undefined);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchUser();
-    } else {
-      setIsLoading(false);
+    if (pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname.startsWith('/products')) {
+      if (accessToken) {
+        const fetchUser = async () => {
+          try {
+            const res = await axios.get(`${API_URL}/users/me`, {
+              headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            setUserEmail(res.data.email);
+          } catch (err) {
+            console.error('Failed to fetch user:', err);
+            document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            setToken(undefined);
+          } finally {
+            setIsLoading(false);
+          }
+        };
+        fetchUser();
+      } else {
+        setIsLoading(false);
+      }
+      return;
     }
-    return;
-  }
 
-  if (pathname === '/adminPannel') {
-    const hasAdminAccess = sessionStorage.getItem('adminAccess') === 'true';
-    if (!hasAdminAccess) {
-      console.log('Navbar: Unauthorized access to /adminPannel, redirecting to /login');
+    if (pathname === '/adminPannel') {
+      const hasAdminAccess = sessionStorage.getItem('adminAccess') === 'true';
+      if (!hasAdminAccess) {
+        console.log('Navbar: Unauthorized access to /adminPannel, redirecting to /login');
+        router.push('/login');
+        return;
+      }
+    }
+
+    if (!accessToken) {
+      setIsLoading(false);
       router.push('/login');
       return;
     }
-  }
 
-  if (!accessToken) {
-    setIsLoading(false);
-    router.push('/login');
-    return;
-  }
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/users/me`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        setUserEmail(res.data.email);
+      } catch (err) {
+        console.error('Failed to fetch user:', err);
+        router.push('/login');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const fetchUser = async () => {
-    try {
-      const res = await axios.get(`${API_URL}/users/me`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      setUserEmail(res.data.email);
-    } catch (err) {
-      console.error('Failed to fetch user:', err);
-      router.push('/login');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  fetchUser();
-}, [pathname, router, API_URL]); // Added API_URL to the dependency array
+    fetchUser();
+  }, [pathname, router, API_URL]);
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
@@ -107,7 +107,6 @@ export default function Navbar() {
     router.push('/signup');
   };
 
-  // Get user initials for avatar
   const getInitials = (email: string | null) => {
     if (!email) return 'U';
     const parts = email.split('@')[0].split('.');
@@ -133,33 +132,30 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-white text-black  p-4 shadow-md mt-4  rounded-lg ">
-      <div className="container mx-auto flex justify-between items-center ">
-        {/* Logo */}
+    <nav className="bg-white text-black p-4 shadow-md mt-4 rounded-lg">
+      <div className="container mx-auto flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold text-blue-600">
           Ahaz Pharma
         </Link>
 
-        {/* Desktop Menu */}
         <div className="hidden md:flex space-x-8 items-center">
           <Link href="/" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 font-medium">
             HOME
           </Link>
-          
           <div className="relative group">
             <button className="text-gray-600 hover:text-blue-600 transition-colors duration-200 font-medium">
               PRODUCTS
             </button>
             <div className="absolute left-0 mt-2 w-48 bg-white text-gray-800 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-2 transition-all duration-200 z-10">
               <Link
-                href="/"
+                href="/products/powder"
                 className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                 onClick={() => setIsProductsDropdownOpen(false)}
               >
                 POWDER PRODUCT
               </Link>
               <Link
-                href="/"
+                href="/products/liquid"
                 className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                 onClick={() => setIsProductsDropdownOpen(false)}
               >
@@ -167,15 +163,14 @@ export default function Navbar() {
               </Link>
             </div>
           </div>
-          <Link href="/" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 font-medium">
+          <Link href="/contact" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 font-medium">
             CONTACT
           </Link>
-          <Link href="/" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 font-medium">
+          <Link href="/about" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 font-medium">
             ABOUT
           </Link>
         </div>
 
-        {/* Profile Avatar */}
         <div className="relative group">
           <div
             className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold cursor-pointer hover:bg-blue-200 transition-colors duration-200"
@@ -217,7 +212,6 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile Menu Button */}
         <div className="md:hidden">
           <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="focus:outline-none">
             {isMobileMenuOpen ? (
@@ -229,7 +223,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden mt-4 bg-white rounded-md shadow-lg p-4">
           <Link
