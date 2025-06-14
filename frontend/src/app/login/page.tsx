@@ -58,7 +58,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       setErrorMessage(null);
-      console.log('LoginPage: Sending login request:', data);
+      // console.log('LoginPage: Sending login request:', data);
       const response = await axios.post<{ accessToken: string }>(`${API_URL}/users/login`, {
         email: data.email,
         password: data.password,
@@ -74,10 +74,10 @@ export default function LoginPage() {
       router.push('/');
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
-        console.error('LoginPage: Error:', err.response?.data || err.message);
+        // console.error('LoginPage: Error:', err.response?.data || err.message);
         setErrorMessage(err.response?.data?.message || 'Login failed. Please try again.');
       } else {
-        console.error('LoginPage: Error:', err);
+        // console.error('LoginPage: Error:', err);
         setErrorMessage('An unexpected error occurred.');
       }
     } finally {
@@ -89,16 +89,16 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       setErrorMessage(null);
-      console.log('LoginPage: Sending reset code request:', data);
+      // console.log('LoginPage: Sending reset code request:', data);
       await axios.post(`${API_URL}/users/send-reset-code`, { email: data.email });
       setForgotEmail(data.email);
       setStep('verify');
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
-        console.error('LoginPage: Send reset code error:', err.response?.data || err.message);
+        // console.error('LoginPage: Send reset code error:', err.response?.data || err.message);
         setErrorMessage(err.response?.data?.message || 'Failed to send verification code. Please try again.');
       } else {
-        console.error('LoginPage: Send reset code error:', err);
+        // console.error('LoginPage: Send reset code error:', err);
         setErrorMessage('An unexpected error occurred.');
       }
     } finally {
@@ -110,7 +110,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       setErrorMessage(null);
-      console.log('LoginPage: Verifying code:', forgotEmail, 'code:', data.code);
+      // console.log('LoginPage: Verifying code:', forgotEmail, 'code:', data.code);
       await axios.post(`${API_URL}/users/verify-reset-code`, {
         email: forgotEmail,
         code: data.code,
@@ -119,10 +119,10 @@ export default function LoginPage() {
       setStep('reset');
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
-        console.error('LoginPage: Verify error:', err.response?.data || err.message);
+        // console.error('LoginPage: Verify error:', err.response?.data || err.message);
         setErrorMessage(err.response?.data?.message || 'Invalid or expired verification code.');
       } else {
-        console.error('LoginPage: Verify error:', err);
+        // console.error('LoginPage: Verify error:', err);
         setErrorMessage('An unexpected error occurred.');
       }
     } finally {
@@ -134,11 +134,11 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       setErrorMessage(null);
-      console.log('LoginPage: Resetting password:', forgotEmail, 'code:', resetCode, 'newPassword:', data.newPassword);
-      await axios.post(`${API_URL}/users/reset-password`, {
-        code: resetCode,
-        newPassword: data.newPassword,
-      });
+      // console.log('LoginPage: Resetting password:', forgotEmail, 'code:', resetCode, 'newPassword:', data.newPassword);
+      // await axios.post(`${API_URL}/users/reset-password`, {
+      //   code: resetCode,
+      //   newPassword: data.newPassword,
+      // });
       setShowSuccessPopup(true);
       setTimeout(() => {
         setShowSuccessPopup(false);

@@ -35,17 +35,17 @@ const SignupPage = () => {
   const onSignupSubmit = async (data: SignupForm) => {
     setIsLoading(true);
     try {
-      console.log('SignupPage: Sending signup request:', data);
+      // console.log('SignupPage: Sending signup request:', data);
       await axios.post(`${API_URL}/users/signup`, data);
       setEmail(data.email);
       setIsVerifying(true);
       setErrorMessage(null);
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
-        console.error('SignupPage: Error:', err.response?.data || err.message);
+        // console.error('SignupPage: Error:', err.response?.data || err.message);
         setErrorMessage(err.response?.data?.message || 'Failed to sign up. Please try again.');
       } else {
-        console.error('SignupPage: Error:', err);
+        // console.error('SignupPage: Error:', err);
         setErrorMessage('An unexpected error occurred.');
       }
     } finally {
@@ -56,7 +56,7 @@ const SignupPage = () => {
   const onVerifySubmit = async (data: VerifyForm) => {
     setIsLoading(true);
     try {
-      console.log('SignupPage: Verifying email:', email, 'code:', data.code);
+      // console.log('SignupPage: Verifying email:', email, 'code:', data.code);
       const response = await axios.post(`${API_URL}/users/verify-email`, {
         email,
         code: data.code,
@@ -71,10 +71,10 @@ const SignupPage = () => {
       }, 3000);
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
-        console.error('SignupPage: Verify error:', err.response?.data || err.message);
+        // console.error('SignupPage: Verify error:', err.response?.data || err.message);
         setErrorMessage(err.response?.data?.message || 'Invalid verification code.');
       } else {
-        console.error('SignupPage: Verify error:', err);
+        // console.error('SignupPage: Verify error:', err);
         setErrorMessage('An unexpected error occurred.');
       }
     } finally {

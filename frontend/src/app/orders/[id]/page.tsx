@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import type { NextPage } from 'next';
 
-// Define the Order interface consistent with original code
+// Define the Order interface
 interface Order {
   id: string;
   items: { productId: number; name: string; quantity: number; price: number }[];
@@ -20,42 +19,49 @@ interface Order {
   createdAt: string;
 }
 
-// Define props type for dynamic route using NextPage
+// Define props type for dynamic route
 type OrderPageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>; // Align with Next.js expectation
 };
 
-const OrderSummaryPage: NextPage<OrderPageProps> = ({ params }) => {
+export default function OrderSummaryPage({ params }: OrderPageProps) {
   const [order, setOrder] = useState<Order | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
-      setError('Order data not available.');
-      setIsLoading(false);
-      return;
-    }
+    // Resolve params Promise
+    params
+      .then((resolvedParams) => {
+        if (typeof window === 'undefined') {
+          setError('Order data not available.');
+          setIsLoading(false);
+          return;
+        }
 
-    const storedOrder = localStorage.getItem('lastOrder');
-    if (storedOrder) {
-      try {
-        const parsedOrder: Order = JSON.parse(storedOrder);
-        if (parsedOrder.id === params.id) {
-          setOrder(parsedOrder);
-          setError(null);
+        const storedOrder = localStorage.getItem('lastOrder');
+        if (storedOrder) {
+          try {
+            const parsedOrder: Order = JSON.parse(storedOrder);
+            if (parsedOrder.id === resolvedParams.id) {
+              setOrder(parsedOrder);
+              setError(null);
+            } else {
+              setError('Order not found.');
+            }
+          } catch (err) {
+            setError('Invalid order data.');
+          }
         } else {
           setError('Order not found.');
         }
-      } catch (err) {
-        console.error('Error parsing order:', err);
-        setError('Invalid order data.');
-      }
-    } else {
-      setError('Order not found.');
-    }
-    setIsLoading(false);
-  }, [params.id]);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setError('Failed to load order data.');
+        setIsLoading(false);
+      });
+  }, [params]);
 
   const handleDownloadPDF = () => {
     if (!order || typeof window === 'undefined') return;
@@ -148,6 +154,4 @@ const OrderSummaryPage: NextPage<OrderPageProps> = ({ params }) => {
       </div>
     </div>
   );
-};
-
-export default OrderSummaryPage;
+}
