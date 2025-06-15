@@ -114,7 +114,7 @@ const CartSlider: React.FC<CartSliderProps> = ({
       </div>
 
       {/* Mobile Bottom Panel */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 flex justify-between items-center z-50">
+      <div className="sm:hidden  fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 flex justify-between items-center z-50">
         <div>
           <p className="text-sm font-semibold">Cart: {totalItems} items</p>
           <p className="text-sm">Total: ${totalPrice.toFixed(2)}</p>

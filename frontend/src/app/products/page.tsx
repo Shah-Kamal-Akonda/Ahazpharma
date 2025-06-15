@@ -174,11 +174,14 @@ const ProductsPage = () => {
     const token = getAccessToken();
     console.log('handleOrderNow: token=', token); // Debug logging for token verification
     if (!token) {
+
+      // alert('You must login first for complete the order');
+      // router.push('/login');
       setIsLoginPopupOpen(true);
       setTimeout(() => {
         setIsLoginPopupOpen(false);
         router.push('/login');
-      }, 2000);
+      }, 3000);
       return;
     }
     if (cart.length === 0) {
@@ -253,8 +256,7 @@ const ProductsPage = () => {
       setIsOrderModalOpen(false);
       localStorage.setItem('lastOrder', JSON.stringify(response.data));
       localStorage.removeItem('cart');
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Delay for backend sync
-      router.push(`/orders/${response.data.id}`);
+      router.push(`/orders/${response.data.id}`); // Immediate navigation
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         console.error('Error creating order:', err.message, err.response?.data);
@@ -275,11 +277,20 @@ const ProductsPage = () => {
       )}
 
       {isLoginPopupOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <p className="text-lg text-center">Please log in to complete your purchase.</p>
-          </div>
-        </div>
+      <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+  <div className="bg-white p-10 rounded-2xl shadow-2xl max-w-sm w-full">
+    {/* Icon for Visual Appeal */}
+    <div className="flex justify-center mb-6">
+      <svg className="w-16 h-16 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm0 2c-2.761 0-5 2.239-5 5h10c0-2.761-2.239-5-5-5z" />
+      </svg>
+    </div>
+
+    {/* Message */}
+    <h2 className="text-3xl font-bold text-gray-800 text-center mb-4">Login Required</h2>
+    <p className="text-gray-500 text-center text-lg leading-relaxed">Please sign in to complete your purchase.</p>
+  </div>
+</div>
       )}
 
       <div className="mb-12">

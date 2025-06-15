@@ -138,7 +138,7 @@ export default function OrderSummaryPage({ params }: OrderPageProps) {
         <p>Email: {order.email}</p>
         <div className="mt-6 flex space-x-4">
           <Link
-            href="/products"
+            href="/"
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
           >
             Continue Shopping
