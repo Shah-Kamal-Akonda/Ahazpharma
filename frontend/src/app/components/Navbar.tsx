@@ -102,6 +102,8 @@ export default function Navbar() {
     }
   };
 
+
+
   const handleSignUpClick = () => {
     setIsProfileDropdownOpen(false);
     router.push('/signup');
@@ -132,151 +134,153 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-white text-black p-4 shadow-md mt-4 rounded-lg">
+   <nav className="w-full bg-gradient-to-r from-blue-50 to-white text-gray-800 p-3 shadow-lg rounded-xl   font-poppins">
       <div className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-blue-600">
+        <Link href="/" className="text-3xl font-extrabold text-blue-700 hover:text-blue-500 transition-colors duration-300">
           Ahaz Pharma
         </Link>
 
-        <div className="hidden md:flex space-x-8 items-center">
-          <Link href="/" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 font-medium">
-            HOME
-          </Link>
-          <div className="relative group">
-            <button className="text-gray-600 hover:text-blue-600 transition-colors duration-200 font-medium">
-              PRODUCTS
-            </button>
-            <div className="absolute left-0 mt-2 w-48 bg-white text-gray-800 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-2 transition-all duration-200 z-10">
-              <Link
-                href="/products/powder"
-                className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                onClick={() => setIsProductsDropdownOpen(false)}
-              >
-                POWDER PRODUCT
-              </Link>
-              <Link
-                href="/products/liquid"
-                className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                onClick={() => setIsProductsDropdownOpen(false)}
-              >
-                LIQUID PRODUCT
-              </Link>
-            </div>
-          </div>
-          <Link href="/contact" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 font-medium">
-            CONTACT
-          </Link>
-          <Link href="/about" className="text-gray-600 hover:text-blue-600 transition-colors duration-200 font-medium">
-            ABOUT
-          </Link>
-        </div>
-
-        <div className="relative group">
-          <div
-            className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold cursor-pointer hover:bg-blue-200 transition-colors duration-200"
-            onMouseEnter={() => setIsProfileDropdownOpen(true)}
-          >
-            {getInitials(userEmail)}
-          </div>
-          {isProfileDropdownOpen && (
-            <div
-              className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-2 transition-all duration-200 z-10"
-              onMouseEnter={() => setIsProfileDropdownOpen(true)}
-              onMouseLeave={() => setIsProfileDropdownOpen(false)}
-            >
-              {token ? (
-                <>
-                  <button
-                    onClick={handleProfileClick}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 rounded-md"
-                  >
-                    Profile
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 rounded-md"
-                  >
-                    <ArrowRightOnRectangleIcon className="h-5 w-5 inline mr-2" />
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={handleSignUpClick}
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 rounded-md"
+        <div className="hidden md:flex items-center space-x-10">
+          <div className="flex space-x-8">
+            <Link href="/" className="text-lg font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 hover:scale-105">
+              Home
+            </Link>
+            <div className="relative group">
+              <button className="text-lg font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 hover:scale-105 cursor-pointer">
+                Products
+              </button>
+              <div className="absolute  mt-5 w-30 bg-black text-white shadow-xl opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-2 transition-all duration-300 z-20">
+                <Link
+                  href="/products/powder"
+                  className="block px-6 py-3 text-white hover:bg-black rounded-lg transition-colors duration-200"
+                  onClick={() => setIsProductsDropdownOpen(false)}
                 >
-                  Sign Up
-                </button>
-              )}
+                  Powder Product
+                </Link>
+                <Link
+                  href="/products/liquid"
+                  className="block px-6 py-3 text-white hover:bg-black rounded-lg transition-colors duration-200"
+                  onClick={() => setIsProductsDropdownOpen(false)}
+                >
+                  Liquid Product
+                </Link>
+              </div>
             </div>
-          )}
+            <Link href="/contact" className="text-lg font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 hover:scale-105">
+              Contact
+            </Link>
+            <Link href="/about" className="text-lg font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 hover:scale-105">
+              About
+            </Link>
+          </div>
+
+          <div className="relative group ml-8">
+            <div
+              className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 text-lg font-bold cursor-pointer hover:bg-blue-300 transition-all duration-300 shadow-md"
+              onMouseEnter={() => setIsProfileDropdownOpen(true)}
+            >
+              {getInitials(userEmail)}
+            </div>
+            {isProfileDropdownOpen && (
+              <div
+                className="absolute right-0 mt-3 w-56 bg-white text-gray-800 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-2 transition-all duration-300 z-20"
+                onMouseEnter={() => setIsProfileDropdownOpen(true)}
+                onMouseLeave={() => setIsProfileDropdownOpen(false)}
+              >
+                {token ? (
+                  <>
+                    <button
+                      onClick={handleProfileClick}
+                      className="block w-full text-left px-6 py-3 text-base hover:bg-blue-50 rounded-lg transition-colors duration-200"
+                    >
+                      Profile
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className=" w-full text-left px-6 py-3 text-base hover:bg-blue-50 rounded-lg transition-colors duration-200 flex items-center"
+                    >
+                      <ArrowRightOnRectangleIcon className="h-5 w-5 inline mr-3" />
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={handleSignUpClick}
+                    className="block w-full text-left px-6 py-3 text-base hover:bg-blue-50 rounded-lg transition-colors duration-200"
+                  >
+                    Sign Up
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="md:hidden">
           <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="focus:outline-none">
             {isMobileMenuOpen ? (
-              <XMarkIcon className="h-8 w-8 text-gray-600" />
+              <XMarkIcon className="h-8 w-8 text-gray-700 hover:text-blue-600 transition-colors duration-200" />
             ) : (
-              <Bars3Icon className="h-8 w-8 text-gray-600" />
+              <Bars3Icon className="h-8 w-8 text-gray-700 hover:text-blue-600 transition-colors duration-200" />
             )}
           </button>
         </div>
       </div>
 
       {isMobileMenuOpen && (
-        <div className="md:hidden mt-4 bg-white rounded-md shadow-lg p-4">
+        <div className="md:hidden mt-6 bg-white rounded-lg shadow-xl p-6">
           <Link
             href="/"
-            className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+            className="block px-6 py-3 text-lg text-gray-700 hover:bg-blue-50 rounded-lg transition-colors duration-200"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            HOME
+            Home
           </Link>
           <div className="relative">
             <button
               onClick={() => setIsProductsDropdownOpen(!isProductsDropdownOpen)}
-              className="block w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+              className="block w-full text-left px-6 py-3 text-lg text-gray-700 hover:bg-blue-50 rounded-lg transition-colors duration-200"
             >
-              PRODUCTS
+              Products
             </button>
             {isProductsDropdownOpen && (
-              <div className="pl-4">
+              <div className="pl-6 mt-2">
                 <Link
                   href="/products/powder"
-                  className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+                  className="block px-6 py-3 text-base text-gray-700 hover:bg-blue-50 rounded-lg transition-colors duration-200"
                   onClick={() => {
                     setIsProductsDropdownOpen(false);
                     setIsMobileMenuOpen(false);
                   }}
                 >
-                  POWDER PRODUCT
+                  Powder Product
                 </Link>
                 <Link
                   href="/products/liquid"
-                  className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+                  className="block px-6 py-3 text-base text-gray-700 hover:bg-blue-50 rounded-lg transition-colors duration-200"
                   onClick={() => {
                     setIsProductsDropdownOpen(false);
                     setIsMobileMenuOpen(false);
                   }}
                 >
-                  LIQUID PRODUCT
+                  Liquid Product
                 </Link>
               </div>
             )}
           </div>
           <Link
             href="/contact"
-            className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+            className="block px-6 py-3 text-lg text-gray-700 hover:bg-blue-50 rounded-lg transition-colors duration-200"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            CONTACT
+            Contact
           </Link>
           <Link
             href="/about"
-            className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+            className="block px-6 py-3 text-lg text-gray-700 hover:bg-blue-50 rounded-lg transition-colors duration-200"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            ABOUT
+            About
           </Link>
         </div>
       )}

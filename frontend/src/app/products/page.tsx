@@ -287,18 +287,24 @@ const ProductsPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {categories.map((category) => (
             <Link key={category.id} href={`/products/category/${category.id}`} className="block">
-              <div className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-                <h3 className="text-lg font-semibold text-gray-800">{category.name}</h3>
-                {category.image && (
-                  <Image
-                    src={`${API_URL}${category.image}`}
-                    alt={category.name}
-                    width={200}
-                    height={200}
-                    className="mt-2 rounded-md object-cover"
-                  />
+              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 font-poppins">
+                {category.image ? (
+                  <div className="relative w-full h-48 mb-4 overflow-hidden rounded-lg">
+                    <Image
+                      src={`${API_URL}${category.image}`}
+                      alt={category.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-48 mb-4 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <span className="text-gray-500 text-sm">No Image Available</span>
+                  </div>
                 )}
-                <p className="text-gray-600 mt-2">{category.products.length} products</p>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">{category.name}</h3>
+                <p className="text-gray-600 text-sm">{category.products.length} products</p>
               </div>
             </Link>
           ))}
@@ -312,45 +318,54 @@ const ProductsPage = () => {
             {uncategorizedProducts.map((product) => {
               const cartItem = cart.find((item) => item.product.id === product.id);
               return (
-                <div key={product.id} className="bg-white p-4 rounded-lg shadow-md">
-                  <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
-                  <p className="text-gray-600">{product.description}</p>
-                  <p className="text-gray-600">Price: ${product.price.toFixed(2)}</p>
-                  <p className="text-gray-600">
+                <div
+                  key={product.id}
+                  className="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 font-poppins"
+                >
+                  {product.image ? (
+                    <div className="relative w-full h-48 mb-4 overflow-hidden rounded-lg">
+                      <Image
+                        src={`${API_URL}${product.image}`}
+                        alt={product.name}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-48 mb-4 bg-gray-200 rounded-lg flex items-center justify-center">
+                      <span className="text-gray-500 text-sm">No Image Available</span>
+                    </div>
+                  )}
+                  <h3 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h3>
+                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
+                  <p className="text-lg font-semibold text-blue-600 mb-2">${product.price.toFixed(2)}</p>
+                  <p className="text-gray-500 text-sm mb-4">
                     Quantity: {product.quantity} {product.quantityUnit}
                   </p>
-                  {product.image && (
-                    <Image
-                      src={`${API_URL}${product.image}`}
-                      alt={product.name}
-                      width={200}
-                      height={150}
-                      className="mt-2 rounded-md object-cover"
-                    />
-                  )}
-                  <div className="mt-4 flex items-center space-x-2">
+                  <div className="flex items-center space-x-3">
                     {cartItem ? (
-                      <>
+                      <div className="flex items-center space-x-2">
                         <button
                           onClick={() => updateCartQuantity(product.id, -1)}
-                          className="bg-gray-300 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-400 transition"
+                          className="bg-gray-200 text-gray-700 px-3 py-2 rounded-full hover:bg-gray-300 transition-colors duration-200 text-lg font-semibold"
                         >
                           -
                         </button>
-                        <span className="bg-blue-500 text-white px-3 py-1 rounded-md">
+                        <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-semibold text-sm">
                           {cartItem.quantity} in Cart
                         </span>
                         <button
                           onClick={() => updateCartQuantity(product.id, 1)}
-                          className="bg-gray-300 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-400 transition"
+                          className="bg-gray-200 text-gray-700 px-3 py-2 rounded-full hover:bg-gray-300 transition-colors duration-200 text-lg font-semibold"
                         >
                           +
                         </button>
-                      </>
+                      </div>
                     ) : (
                       <button
                         onClick={() => addToCart(product)}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+                        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold"
                       >
                         Add to Cart
                       </button>

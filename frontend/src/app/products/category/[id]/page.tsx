@@ -43,7 +43,7 @@ const CategoryProductsPage = () => {
       const response = await axios.get(`${API_URL}/orders/addresses`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log('Fetched addresses:', response.data); // Debug log
+      console.log('Fetched addresses:', response.data);
       setAddresses(response.data);
       if (response.data.length > 0) {
         setSelectedAddress(response.data[0]);
@@ -82,7 +82,7 @@ const CategoryProductsPage = () => {
         fetchAddresses();
       }
     }
-  }, [id, fetchAddresses]); // fetchAddresses is now declared before use
+  }, [id]);
 
   const fetchCategoryProducts = async (categoryId: number) => {
     try {
@@ -144,13 +144,10 @@ const CategoryProductsPage = () => {
 
   const handleOrderNow = () => {
     const token = getAccessToken();
-    console.log('handleOrderNow: token=', token); // Debug log
     if (!token) {
-      console.log('Showing login popup for non-authenticated user'); // Debug log
       setIsLoginPopupOpen(true);
       setTimeout(() => {
         setIsLoginPopupOpen(false);
-        console.log('Redirecting to /login'); // Debug log
         router.push('/login');
       }, 2000);
       return;
@@ -186,7 +183,6 @@ const CategoryProductsPage = () => {
       const response = await axios.post(`${API_URL}/users/address`, addressData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log('Saved address:', response.data); // Debug log
       setAddresses([...addresses, response.data]);
       setSelectedAddress(response.data);
       setIsAddressModalOpen(false);
@@ -226,12 +222,11 @@ const CategoryProductsPage = () => {
         { items, total, addressId: selectedAddress.id },
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      console.log('Order created:', { id: response.data.id, response: response.data }); // Debug log
       setCart([]);
       setIsOrderModalOpen(false);
       localStorage.setItem('lastOrder', JSON.stringify(response.data));
       localStorage.removeItem('cart');
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Delay for backend sync
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       router.push(`/orders/${response.data.id}`);
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
@@ -245,64 +240,73 @@ const CategoryProductsPage = () => {
   };
 
   return (
-    <div className={`min-h-screen bg-gray-100 p-6 transition-all duration-300 ${isCartOpen ? 'sm:pr-80' : ''}`}>
-      <h1 className="text-3xl font-bold text-center mb-8">{categoryName} Products</h1>
+    <div className={`min-h-screen bg-gradient-to-b from-blue-50 to-white p-8 transition-all duration-300 ${isCartOpen ? 'sm:pr-80' : ''} font-poppins`}>
+      <h1 className="text-4xl font-extrabold text-gray-800 text-center mb-10">{categoryName} Products</h1>
 
       {errorMessage && (
-        <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-md">{errorMessage}</div>
+        <div className="mb-8 p-4 bg-red-100 text-red-700 rounded-lg shadow-md">{errorMessage}</div>
       )}
 
       {isLoginPopupOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <p className="text-lg text-center">For purchase product you should login first</p>
+          <div className="bg-white p-8 rounded-lg shadow-xl">
+            <p className="text-lg font-semibold text-gray-800 text-center">Please log in to complete your purchase</p>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => {
           const cartItem = cart.find((item) => item.product.id === product.id);
           return (
-            <div key={product.id} className="bg-white p-4 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold">{product.name}</h3>
-              <p className="text-gray-600">{product.description}</p>
-              <p className="text-gray-600">Price: ${product.price.toFixed(2)}</p>
-              <p className="text-gray-600">
-                Quantity: ${product.quantity} ${product.quantityUnit}
-              </p>
-              {product.image && (
-                <Image
-                  src={`${API_URL}${product.image}`}
-                  alt={product.name}
-                  width={100}
-                  height={100}
-                  className="mt-2 rounded-md"
-                />
+            <div
+              key={product.id}
+              className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            >
+              {product.image ? (
+                <div className="relative w-full h-48 mb-4">
+                  <Image
+                    src={`${API_URL}${product.image}`}
+                    alt={product.name}
+                    fill
+                    className="object-cover rounded-lg"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-48 mb-4 bg-gray-200 rounded-lg flex items-center justify-center">
+                  <span className="text-gray-500">No Image</span>
+                </div>
               )}
-              <div className="mt-4 flex items-center space-x-2">
+              <h3 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h3>
+              <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
+              <p className="text-lg font-semibold text-blue-600 mb-2">${product.price.toFixed(2)}</p>
+              <p className="text-gray-500 text-sm mb-4">
+                Quantity: {product.quantity} {product.quantityUnit}
+              </p>
+              <div className="flex items-center space-x-3">
                 {cartItem ? (
-                  <>
+                  <div className="flex items-center space-x-2">
                     <button
                       onClick={() => updateCartQuantity(product.id, -1)}
-                      className="bg-gray-300 text-gray-700 px-2 py-1 rounded-md hover:bg-gray-400"
+                      className="bg-gray-200 text-gray-700 px-3 py-2 rounded-full hover:bg-gray-300 transition-colors duration-200"
                     >
                       -
                     </button>
-                    <span className="bg-blue-500 text-white px-4 py-1 rounded-md">
-                      ${cartItem.quantity} in Cart
+                    <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-semibold">
+                      {cartItem.quantity} in Cart
                     </span>
                     <button
                       onClick={() => updateCartQuantity(product.id, 1)}
-                      className="bg-gray-300 text-gray-700 px-2 py-1 rounded-md hover:bg-gray-400"
+                      className="bg-gray-200 text-gray-700 px-3 py-2 rounded-full hover:bg-gray-300 transition-colors duration-200"
                     >
                       +
                     </button>
-                  </>
+                  </div>
                 ) : (
                   <button
                     onClick={() => addToCart(product)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold"
                   >
                     Add to Cart
                   </button>
