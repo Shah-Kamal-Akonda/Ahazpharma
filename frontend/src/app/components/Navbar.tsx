@@ -28,7 +28,7 @@ export default function Navbar() {
 
     setToken(accessToken);
 
-    if (pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname.startsWith('/products')) {
+    if (pathname === '/' || pathname === '/components/ContactUs' || pathname === '/components/AboutUs'  || pathname === '/login' || pathname === '/signup' || pathname.startsWith('/products')) {
       if (accessToken) {
         const fetchUser = async () => {
           try {
@@ -145,31 +145,15 @@ export default function Navbar() {
             <Link href="/" className="text-lg font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 hover:scale-105">
               Home
             </Link>
-            <div className="relative group">
-              <button className="text-lg font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 hover:scale-105 cursor-pointer">
-                Products
-              </button>
-              <div className="absolute  mt-5 w-30 bg-black text-white shadow-xl opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-2 transition-all duration-300 z-20">
-                <Link
-                  href="/products/powder"
-                  className="block px-6 py-3 text-white hover:bg-black rounded-lg transition-colors duration-200"
-                  onClick={() => setIsProductsDropdownOpen(false)}
-                >
-                  Powder Product
-                </Link>
-                <Link
-                  href="/products/liquid"
-                  className="block px-6 py-3 text-white hover:bg-black rounded-lg transition-colors duration-200"
-                  onClick={() => setIsProductsDropdownOpen(false)}
-                >
-                  Liquid Product
-                </Link>
-              </div>
-            </div>
-            <Link href="/contact" className="text-lg font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 hover:scale-105">
+
+             <Link href="/products" className="text-lg font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 hover:scale-105">
+              Products
+            </Link>
+          
+            <Link href="/components/ContactUs" className="text-lg font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 hover:scale-105">
               Contact
             </Link>
-            <Link href="/about" className="text-lg font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 hover:scale-105">
+            <Link href="/components/AboutUs" className="text-lg font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 hover:scale-105">
               About
             </Link>
           </div>

@@ -95,7 +95,7 @@ const SignupPage = () => {
       {/* Overlay for readability */}
       <div className="absolute inset-0 bg-black/30"></div>
       
-      <div className="relative w-full max-w-lg bg-white/90 rounded-2xl shadow-2xl p-6 sm:p-8 md:p-10">
+      <div className="  relative   w-full max-w-lg bg-white/90 rounded-2xl shadow-2xl p-6 sm:p-8 md:p-10">
         <h1 className="text-3xl sm:text-4xl font-extrabold mb-6 text-center text-blue-700 tracking-tight">
           {isVerifying ? 'Verify Your Email' : 'Create Your Account'}
         </h1>
@@ -205,7 +205,7 @@ const SignupPage = () => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Sending Code...
+                  Sending Code to your email...
                 </span>
               ) : (
                 'Sign Up'
