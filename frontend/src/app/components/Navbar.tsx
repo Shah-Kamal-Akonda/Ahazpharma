@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import axios from 'axios';
 import { ArrowRightOnRectangleIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 
 export default function Navbar() {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -120,11 +121,17 @@ export default function Navbar() {
 
   if (isLoading) {
     return (
-      <nav className="bg-white text-gray-800 p-4 shadow-md mt-4 mx-4 rounded-lg">
+      <nav className="bg-white text-gray-800 p-4 shadow-md mt-4 mx-4 ">
         <div className="container mx-auto flex justify-between items-center">
-          <Link href="/products" className="text-2xl font-bold text-blue-600">
-            Ahaz Pharma
-          </Link>
+         <Link href="/" className="flex items-center">
+    <Image
+      src="/Ahazpharma_logo.jpg"
+      alt="Ahaz Pharma Logo"
+      width={160} // Adjust width as needed
+      height={30}
+      className="object-contain"
+    />
+  </Link>
           <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
             U
           </div>
@@ -134,11 +141,16 @@ export default function Navbar() {
   }
 
   return (
-   <nav className="w-full bg-gradient-to-r from-blue-50 to-white text-gray-800 p-3 shadow-lg rounded-xl   font-poppins">
-      <div className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="text-3xl font-extrabold text-blue-700 hover:text-blue-500 transition-colors duration-300">
-          Ahaz Pharma
-        </Link>
+   <nav className="w-full bg-white text-gray-800 p-3 shadow-lg    font-poppins">
+      <div className="container mx-auto flex justify-between items-center ">
+ <Link href="/" className="relative w-[160px] h-[70px]">
+    <Image
+      src="/Ahazpharma_logo.png"
+      alt="Ahaz Pharma Logo"
+      fill
+      className="object-contain"
+    />
+  </Link>
 
         <div className="hidden md:flex items-center space-x-10">
           <div className="flex space-x-8">
