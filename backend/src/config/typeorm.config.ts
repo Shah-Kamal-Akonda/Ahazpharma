@@ -13,7 +13,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   password: process.env.DATABASE_PASSWORD || 'Kamal2093@',
   database: process.env.DATABASE_NAME || 'AhazPharma',
   entities: [Product, Category, User, Address,Order],
-  synchronize: true, // Set to false in production
+  synchronize: false, // Set to false in production
   logging: true, // Enable logging for debugging
   ssl: {
     rejectUnauthorized: false, // This disables certificate validation (safe for testing)
