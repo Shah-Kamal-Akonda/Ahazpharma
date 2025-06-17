@@ -1,4 +1,3 @@
-// app.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -18,14 +17,11 @@ import { WhatsappModule } from './whatsapp/whatsapp.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('DATABASE_HOST', 'localhost'),
-        port: configService.get<number>('DATABASE_PORT', 5432),
-        username: configService.get<string>('DATABASE_USER', 'postgres'),
-        password: configService.get<string>('DATABASE_PASSWORD', 'Kamal2093@'),
-        database: configService.get<string>('DATABASE_NAME', 'AhazPharma'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'], // Or specify your entities explicitly
-        synchronize: true,
+        url: configService.get<string>('DATABASE_URL') || `postgres://${configService.get<string>('DATABASE_USER', 'postgres')}:${configService.get<string>('DATABASE_PASSWORD', 'Kamal2093@')}@${configService.get<string>('DATABASE_HOST', 'localhost')}:${configService.get<number>('DATABASE_PORT', 5432)}/${configService.get<string>('DATABASE_NAME', 'AhazPharma')}`,
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: configService.get<string>('NODE_ENV') === 'production' ? false : true, // Disable synchronize in production
         logging: true,
+        ssl: configService.get<string>('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false, // Enable SSL only in production
       }),
     }),
     ProductsModule,
