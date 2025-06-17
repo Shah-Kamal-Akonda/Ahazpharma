@@ -15,4 +15,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   entities: [Product, Category, User, Address,Order],
   synchronize: true, // Set to false in production
   logging: true, // Enable logging for debugging
+  ssl: {
+    rejectUnauthorized: false, // This disables certificate validation (safe for testing)
+  },
 };
