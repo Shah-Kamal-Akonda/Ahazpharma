@@ -9,7 +9,7 @@ import AddressForm from '@/app/components/AddressForm';
 import OrderPopup from '@/app/components/OrderPopup';
 import { Product, CartItem, Address } from '@/app/types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+const API_URL =  'http://localhost:5001';
 
 const CategoryProductsPage = () => {
   const { id } = useParams();

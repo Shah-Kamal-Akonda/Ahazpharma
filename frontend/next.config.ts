@@ -68,19 +68,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'ahazpharma.onrender.com',
         port: '',
-        pathname: '/Uploads/products/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'ahazpharma.onrender.com',
-        port: '',
-        pathname: '/uploads/*/**',
+        pathname: '/uploads/products/**',
       },
     ],
+    domains: ['localhost', 'ahazpharma.onrender.com'], // Legacy support for older Next.js versions
   },
   eslint: {
     ignoreDuringBuilds: true, // Avoid ESLint build errors in Vercel
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
