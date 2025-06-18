@@ -1,4 +1,3 @@
-// app.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -18,14 +17,17 @@ import { WhatsappModule } from './whatsapp/whatsapp.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('DATABASE_HOST', 'localhost'),
+        host: configService.get<string>('DATABASE_HOST'),
         port: configService.get<number>('DATABASE_PORT', 5432),
-        username: configService.get<string>('DATABASE_USER', 'postgres'),
-        password: configService.get<string>('DATABASE_PASSWORD', 'Kamal2093@'),
-        database: configService.get<string>('DATABASE_NAME', 'AhazPharma'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'], // Or specify your entities explicitly
-        synchronize: true,
-        logging: true,
+        username: configService.get<string>('DATABASE_USER'),
+        password: configService.get<string>('DATABASE_PASSWORD'),
+        database: configService.get<string>('DATABASE_NAME'),
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: false, // Set to false in production
+        logging: true, // Enable logging for debugging
+        ssl: {
+          rejectUnauthorized: false, // Required for Render's PostgreSQL
+        },
       }),
     }),
     ProductsModule,
