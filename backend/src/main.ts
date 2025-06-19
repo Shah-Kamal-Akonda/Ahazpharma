@@ -11,7 +11,7 @@ async function bootstrap() {
 
   // CORS configuration
   app.enableCors({
-    origin: ['http://localhost:3000', 'https://ahazpharma-69bi.vercel.app/'], // Replace with your Vercel URL
+    origin: ['http://localhost:3000', 'https://ahazpharma-69bi-mcgp52dbo-md-shah-kamal-akondas-projects.vercel.app/'], // Replace with your Vercel URL
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
