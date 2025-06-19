@@ -44,7 +44,8 @@ interface Address {
   email: string;
 }
 
-const API_URL =  'http://localhost:5001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 
 const ProductsPage = () => {
   const [categories, setCategories] = useState<Category[]>([]);
