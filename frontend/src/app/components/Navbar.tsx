@@ -17,7 +17,8 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+  // const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     const accessToken = typeof window !== 'undefined'

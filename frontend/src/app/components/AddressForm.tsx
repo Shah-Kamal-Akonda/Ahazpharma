@@ -24,7 +24,8 @@ interface AddressFormProps {
   onClose: () => void;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+// const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const AddressForm: React.FC<AddressFormProps> = ({ onSubmit, onClose }) => {
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<AddressFormData>();
