@@ -17,7 +17,7 @@ async function bootstrap() {
   });
 
   // Serve static files
-  app.use('/uploads', express.static(join(__dirname, '..', 'Uploads'), {
+  app.use('/uploads', express.static(join(__dirname, '..', 'uploads'), {
     setHeaders: (res, path) => {
       if (path.endsWith('.jpeg') || path.endsWith('.jpg')) {
         res.set('Content-Type', 'image/jpeg');
