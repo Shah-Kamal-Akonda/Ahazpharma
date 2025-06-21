@@ -25,7 +25,7 @@ interface CartSliderProps {
   onOrderNow: () => void;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const CartSlider: React.FC<CartSliderProps> = ({
   cart,
