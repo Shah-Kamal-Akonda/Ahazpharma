@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { useSearchParams, usePathname } from 'next/navigation';
 
 interface Product {
   id: number;
@@ -21,30 +20,7 @@ interface Product {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// Child component to isolate useSearchParams and usePathname
-const FilterControls: React.FC<{ onClearFilter: () => void }> = ({ onClearFilter }) => {
-  console.log('FilterControls Rendered: Client-Side'); // Debug log
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const productId = searchParams.get('productId');
-  const isCategoryPage = pathname.match(/^\/products\/category\/\d+$/);
-
-  return (
-    <>
-      {(productId || isCategoryPage) && (
-        <button
-          onClick={onClearFilter}
-          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all duration-200 font-semibold font-poppins"
-        >
-          Clear Filter
-        </button>
-      )}
-    </>
-  );
-};
-
 const SearchBox: React.FC = () => {
-  console.log('SearchBox Rendered: Client-Side'); // Debug log
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -92,37 +68,23 @@ const SearchBox: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleProductClick = (product: Product) => {
+  const handleProductClick = (productId: number) => {
     setIsDropdownOpen(false);
     setSearchTerm('');
-    if (product.categoryId) {
-      router.push(`/products/category/${product.categoryId}`);
-    } else {
-      router.push(`/products?productId=${product.id}`);
-    }
-  };
-
-  const clearFilter = () => {
-    setSearchTerm('');
-    setSearchResults([]);
-    setIsDropdownOpen(false);
-    router.push('/products');
+    router.push(`/products/${productId}`);
   };
 
   return (
     <div className="relative w-full max-w-md mx-auto font-poppins">
-      <div className="flex items-center space-x-2">
-        <div className="relative flex-1">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search products by name..."
-            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800"
-          />
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
-        </div>
-        <FilterControls onClearFilter={clearFilter} />
+      <div className="relative">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search products..."
+          className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800"
+        />
+        <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
       </div>
 
       {error && (
@@ -139,7 +101,7 @@ const SearchBox: React.FC = () => {
           {searchResults.map((product) => (
             <div
               key={product.id}
-              onClick={() => handleProductClick(product)}
+              onClick={() => handleProductClick(product.id)}
               className="flex items-center space-x-4 p-3 hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors duration-200"
             >
               {product.image ? (
