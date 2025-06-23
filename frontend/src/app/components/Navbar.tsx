@@ -6,7 +6,13 @@ import { useRouter, usePathname } from 'next/navigation';
 import axios from 'axios';
 import { ArrowRightOnRectangleIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import SearchBox from './searchBox';
+import dynamic from 'next/dynamic';
+
+// Lazy-load SearchBox to defer client-side rendering
+const SearchBox = dynamic(() => import('./searchBox'), {
+  ssr: false, // Disable server-side rendering for SearchBox
+  loading: () => <div className="w-full max-w-sm h-10 bg-gray-200 rounded-lg animate-pulse" />,
+});
 
 export default function Navbar() {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -310,20 +316,19 @@ export default function Navbar() {
             <Link
               href="/products"
               className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
-              onClick={() => setIsMobileMenuOpen(false)}
             >
               Products
             </Link>
             <Link
               href="/components/ContactUs"
-              className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
+              className="text-lg font-medium block px-4 py-2 text-gray-900 hover:bg-green-600 hover:text-white rounded-lg transition-colors duration-200"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Contact
             </Link>
             <Link
               href="/components/AboutUs"
-              className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
+              className="text-lg font-medium block px-4 py-2 text-gray-900 hover:bg-green-600 hover:text-white rounded-lg transition-colors duration-200"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               About
