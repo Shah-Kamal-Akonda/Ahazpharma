@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import axios from 'axios';
 import { ArrowRightOnRectangleIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import SearchBox from './searchBox';
 
 export default function Navbar() {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -29,7 +30,7 @@ export default function Navbar() {
 
     setToken(accessToken);
 
-    if (pathname === '/' || pathname === '/components/ContactUs' || pathname === '/components/AboutUs'  || pathname === '/login' || pathname === '/signup' || pathname.startsWith('/products')) {
+    if (pathname === '/' || pathname === '/components/ContactUs' || pathname === '/components/AboutUs' || pathname === '/login' || pathname === '/signup' || pathname.startsWith('/products')) {
       if (accessToken) {
         const fetchUser = async () => {
           try {
@@ -139,7 +140,7 @@ export default function Navbar() {
 
   return (
     <nav className="w-full bg-white text-gray-800 p-3 shadow-lg font-poppins">
-      <div className="container mx-auto flex justify-between items-center">
+      <div className="container mx-auto flex flex-wrap justify-between items-center">
         <Link href="/" className="relative w-[120px] h-[50px]">
           <Image
             src="/Ahazpharma_logo.png"
@@ -149,6 +150,12 @@ export default function Navbar() {
           />
         </Link>
 
+        {/* SearchBox for Desktop - Centered */}
+        <div className="hidden md:flex flex-1 justify-center mx-4">
+          <SearchBox />
+        </div>
+
+        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
           <div className="flex space-x-6">
             <Link href="/" className="text-base font-medium text-gray-700 hover:text-green-600 transition-colors duration-300 hover:scale-105">
@@ -209,6 +216,7 @@ export default function Navbar() {
           </div>
         </div>
 
+        {/* Mobile Navigation */}
         <div className="flex items-center space-x-3 md:hidden">
           <div className="relative">
             <div
@@ -269,40 +277,46 @@ export default function Navbar() {
             )}
           </button>
         </div>
-      </div>
 
-      {isMobileMenuOpen && (
-        <div className="md:hidden mt-4 bg-white rounded-lg shadow-xl p-4">
-          <Link
-            href="/"
-            className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Home
-          </Link>
-          <Link
-            href="/products"
-            className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Products
-          </Link>
-          <Link
-            href="/components/ContactUs"
-            className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Contact
-          </Link>
-          <Link
-            href="/components/AboutUs"
-            className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            About
-          </Link>
+        {/* SearchBox for Mobile - Below Logo and Icons */}
+        <div className="md:hidden w-full mt-4">
+          <SearchBox />
         </div>
-      )}
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden mt-4 bg-white rounded-lg shadow-xl p-4">
+            <Link
+              href="/"
+              className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <Link
+              href="/products"
+              className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Products
+            </Link>
+            <Link
+              href="/components/ContactUs"
+              className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Contact
+            </Link>
+            <Link
+              href="/components/AboutUs"
+              className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              About
+            </Link>
+          </div>
+        )}
+      </div>
     </nav>
   );
 }
