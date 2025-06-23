@@ -23,7 +23,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Child component to isolate useSearchParams and usePathname
 const FilterControls: React.FC<{ onClearFilter: () => void }> = ({ onClearFilter }) => {
-  console.log('FilterControls Rendered: Client-Side');
+  console.log('FilterControls Rendered: Client-Side'); // Debug log
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const productId = searchParams.get('productId');
@@ -44,7 +44,7 @@ const FilterControls: React.FC<{ onClearFilter: () => void }> = ({ onClearFilter
 };
 
 const SearchBox: React.FC = () => {
-  console.log('SearchBox Rendered: Client-Side');
+  console.log('SearchBox Rendered: Client-Side'); // Debug log
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -93,7 +93,6 @@ const SearchBox: React.FC = () => {
   }, []);
 
   const handleProductClick = (product: Product) => {
-    console.log('Product Clicked:', { id: product.id, categoryId: product.categoryId }); // Debug log
     setIsDropdownOpen(false);
     setSearchTerm('');
     if (product.categoryId) {
