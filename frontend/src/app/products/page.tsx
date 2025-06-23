@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import CartSlider from '../components/CartSlider';
 import AddressForm from '../components/AddressForm';
 import OrderPopup from '../components/OrderPopup';
@@ -46,10 +46,10 @@ interface Address {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+
 const ProductsPage = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [uncategorizedProducts, setUncategorizedProducts] = useState<Product[]>([]);
-  const [filteredProduct, setFilteredProduct] = useState<Product | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -59,7 +59,6 @@ const ProductsPage = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   // Get accessToken from cookies
   const getAccessToken = () => {
@@ -92,22 +91,6 @@ const ProductsPage = () => {
       fetchAddresses(token);
     }
   }, []);
-
-  // Filter uncategorized products based on productId query param
-  useEffect(() => {
-    const productId = searchParams.get('productId');
-    if (productId && uncategorizedProducts.length > 0) {
-      const product = uncategorizedProducts.find((p) => p.id === parseInt(productId));
-      if (product) {
-        setFilteredProduct(product);
-      } else {
-        setErrorMessage('Product not found.');
-        setFilteredProduct(null);
-      }
-    } else {
-      setFilteredProduct(null);
-    }
-  }, [searchParams, uncategorizedProducts]);
 
   const fetchCategories = async () => {
     try {
@@ -190,8 +173,11 @@ const ProductsPage = () => {
 
   const handleOrderNow = () => {
     const token = getAccessToken();
-    console.log('handleOrderNow: token=', token);
+    console.log('handleOrderNow: token=', token); // Debug logging for token verification
     if (!token) {
+
+      // alert('You must login first for complete the order');
+      // router.push('/login');
       setIsLoginPopupOpen(true);
       setTimeout(() => {
         setIsLoginPopupOpen(false);
@@ -266,12 +252,12 @@ const ProductsPage = () => {
         { items, total, addressId: selectedAddress.id },
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      console.log('Order created:', { id: response.data.id, response: response.data });
+      console.log('Order created:', { id: response.data.id, response: response.data }); // Debug log
       setCart([]);
       setIsOrderModalOpen(false);
       localStorage.setItem('lastOrder', JSON.stringify(response.data));
       localStorage.removeItem('cart');
-      router.push(`/orders/${response.data.id}`);
+      router.push(`/orders/${response.data.id}`); // Immediate navigation
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         console.error('Error creating order:', err.message, err.response?.data);
@@ -285,97 +271,31 @@ const ProductsPage = () => {
 
   return (
     <div className={`min-h-screen bg-gray-100 p-6 transition-all duration-300 ${isCartOpen ? 'sm:pr-80' : ''}`}>
-      <h1 className="text-3xl font-bold text-center mb-8 font-poppins">Product Catalog</h1>
+      <h1 className="text-3xl font-bold text-center mb-8">Product Catalog</h1>
 
       {errorMessage && (
         <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">{errorMessage}</div>
       )}
 
       {isLoginPopupOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white p-10 rounded-2xl shadow-2xl max-w-sm w-full">
-            <div className="flex justify-center mb-6">
-              <svg className="w-16 h-16 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm0 2c-2.761 0-5 2.239-5 5h10c0-2.761-2.239-5-5-5z" />
-              </svg>
-            </div>
-            <h2 className="text-3xl font-bold text-gray-800 text-center mb-4">Login Required</h2>
-            <p className="text-gray-500 text-center text-lg leading-relaxed">Please sign in to complete your purchase.</p>
-          </div>
-        </div>
+      <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+  <div className="bg-white p-10 rounded-2xl shadow-2xl max-w-sm w-full">
+    {/* Icon for Visual Appeal */}
+    <div className="flex justify-center mb-6">
+      <svg className="w-16 h-16 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm0 2c-2.761 0-5 2.239-5 5h10c0-2.761-2.239-5-5-5z" />
+      </svg>
+    </div>
+
+    {/* Message */}
+    <h2 className="text-3xl font-bold text-gray-800 text-center mb-4">Login Required</h2>
+    <p className="text-gray-500 text-center text-lg leading-relaxed">Please sign in to complete your purchase.</p>
+  </div>
+</div>
       )}
 
-      {/* Render Selected Product first if filtered */}
-      {filteredProduct && (
-        <div className="mb-12">
-          <h2 className="text-2xl font-semibold mb-4 font-poppins">Selected Product</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[filteredProduct].map((product) => {
-              const cartItem = cart.find((item) => item.product.id === product.id);
-              return (
-                <div
-                  key={product.id}
-                  className="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 font-poppins"
-                >
-                  {product.image ? (
-                    <div className="relative w-full h-48 mb-4 overflow-hidden rounded-lg">
-                      <Image
-                        src={`${API_URL}${product.image}`}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-full h-48 mb-4 bg-gray-200 rounded-lg flex items-center justify-center">
-                      <span className="text-gray-500 text-sm">No Image Available</span>
-                    </div>
-                  )}
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h3>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
-                  <p className="text-lg font-semibold text-blue-600 mb-2">${product.price.toFixed(2)}</p>
-                  <p className="text-gray-500 text-sm mb-4">
-                    Quantity: {product.quantity} {product.quantityUnit}
-                  </p>
-                  <div className="flex items-center space-x-3">
-                    {cartItem ? (
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => updateCartQuantity(product.id, -1)}
-                          className="bg-gray-200 text-gray-700 px-3 py-2 rounded-full hover:bg-gray-300 transition-all duration-200 text-lg font-semibold"
-                        >
-                          -
-                        </button>
-                        <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-semibold text-sm">
-                          {cartItem.quantity} in Cart
-                        </span>
-                        <button
-                          onClick={() => updateCartQuantity(product.id, 1)}
-                          className="bg-gray-200 text-gray-700 px-3 py-2 rounded-full hover:bg-gray-300 transition-all duration-200 text-lg font-semibold"
-                        >
-                          +
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => addToCart(product)}
-                        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold"
-                      >
-                        Add to Cart
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Render Categories */}
       <div className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4 font-poppins">Browse by Category</h2>
+        <h2 className="text-2xl font-semibold mb-4">Browse by Category</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6">
           {categories.map((category) => (
             <Link key={category.id} href={`/products/category/${category.id}`} className="block">
@@ -403,10 +323,9 @@ const ProductsPage = () => {
         </div>
       </div>
 
-      {/* Render Uncategorized Products if no filter */}
-      {!filteredProduct && uncategorizedProducts.length > 0 && (
+      {uncategorizedProducts.length > 0 && (
         <div className="mb-12">
-          <h2 className="text-2xl font-semibold mb-4 font-poppins">Featured Products</h2>
+          <h2 className="text-2xl font-semibold mb-4">Featured Products</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {uncategorizedProducts.map((product) => {
               const cartItem = cart.find((item) => item.product.id === product.id);
@@ -441,7 +360,7 @@ const ProductsPage = () => {
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => updateCartQuantity(product.id, -1)}
-                          className="bg-gray-200 text-gray-700 px-3 py-2 rounded-full hover:bg-gray-300 transition-all duration-200 text-lg font-semibold"
+                          className="bg-gray-200 text-gray-700 px-3 py-2 rounded-full hover:bg-gray-300 transition-colors duration-200 text-lg font-semibold"
                         >
                           -
                         </button>
@@ -450,7 +369,7 @@ const ProductsPage = () => {
                         </span>
                         <button
                           onClick={() => updateCartQuantity(product.id, 1)}
-                          className="bg-gray-200 text-gray-700 px-3 py-2 rounded-full hover:bg-gray-300 transition-all duration-200 text-lg font-semibold"
+                          className="bg-gray-200 text-gray-700 px-3 py-2 rounded-full hover:bg-gray-300 transition-colors duration-200 text-lg font-semibold"
                         >
                           +
                         </button>
