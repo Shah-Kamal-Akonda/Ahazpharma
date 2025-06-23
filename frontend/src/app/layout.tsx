@@ -21,6 +21,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Navbar />
+            
         <SearchBox /> {/* ✅ Uppercase component usage */}
         {children}
         <Footer />

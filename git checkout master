@@ -1,0 +1,36 @@
+[33m1a5b085[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m change to old
+[33m9d3cd09[m  updated files layout , page
+[33m3e5fa9f[m search box updated
+[33ma3c2576[m  after error change navbar and layout file
+[33m136c10e[m search input bar set in navbar make issue fixed
+[33m292583c[m signup and login page desing color changed, cart slider changed , backend search by name funciton changed, add search box as well
+[33m0341c0e[m change all pages url to public url
+[33m47346c2[m change url to public url in product ,category and card slider page
+[33m384c87d[m change Uploads to uploads
+[33m63fafb2[m change product page usl
+[33me76f7e4[m live link update vercell
+[33mc2c9eee[m update vercel link
+[33m874ba39[m use both 3000 and  vercell link
+[33m7b39d53[m just use vercell link
+[33md2dd4ef[m give vercell actuall link
+[33md32398e[m Updated CORS to include Vercel frontend URL
+[33m5f841be[m product page url
+[33m8c6b96b[m Updated next.config.ts to remove deprecated images.domains
+[33mfaec6be[m Updated database configuration for Render deployment
+[33mb3f18fe[m appmodule, .env and typeormconfig.ts file changes
+[33mb9a630e[m Update TypeORM config with conditional SSL and DATABASE_URL
+[33mae718bf[m type orm file synchronize make false
+[33mcd59758[m typerormconfig.ts file changes
+[33m90f941c[m  app module file
+[33m68e9e8d[m add about ,contact, pages and change hero section
+[33m7abcd89[m desing updates
+[33m53a62e0[m category product cart and product cart  designing beautifully
+[33m2830155[m Fix: ignore ESLint errors during Vercel build
+[33m0182028[m .eslintrc.json
+[33maf6ff12[m order id page
+[33mbc1bdcc[m orders id page changed
+[33m8c7ad12[m order/[id]/page
+[33m4345b3f[m � Update login flow, UI fixes, and add new product images
+[33m42d627f[m Allow builds to ignore ESLint errors temporarily
+[33m4ed4d1f[m Add frontend files as normal folder with proper line endings
+[33m3b5c709[m Removed nested frontend git repo, add frontend as normal folder
