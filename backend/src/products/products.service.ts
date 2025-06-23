@@ -54,11 +54,26 @@ export class ProductsService {
     await this.productRepository.remove(product);
   }
 
-  async searchByName(name: string): Promise<Product[]> {
-    return this.productRepository.find({
-      where: { name: Like(`%${name}%`) },
-      relations: ['category'],
-    });
+  // async searchByName(name: string): Promise<Product[]> {
+  //   return this.productRepository.find({
+  //     where: { name: Like(`%${name}%`) },
+  //     relations: ['category'],
+  //   });
+  // }
+
+ async searchByName(name: string): Promise<Product[]> {
+    console.log(`Searching products with name: ${name}`);
+    try {
+      const products = await this.productRepository.find({
+        where: { name: Like(`%${name}%`) },
+        relations: ['category'],
+      });
+      console.log(`Found ${products.length} products:`, products);
+      return products;
+    } catch (error) {
+      console.error('Error in searchByName:', error);
+      throw new Error('Failed to search products');
+    }
   }
 
   async findByCategory(categoryId: number): Promise<Product[]> {

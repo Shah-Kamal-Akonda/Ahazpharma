@@ -181,7 +181,7 @@ const ProductsPage = () => {
       setIsLoginPopupOpen(true);
       setTimeout(() => {
         setIsLoginPopupOpen(false);
-        router.push('/login');
+        router.push('/signup');
       }, 3000);
       return;
     }
@@ -296,7 +296,7 @@ const ProductsPage = () => {
 
       <div className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Browse by Category</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6">
           {categories.map((category) => (
             <Link key={category.id} href={`/products/category/${category.id}`} className="block">
               <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 font-poppins">

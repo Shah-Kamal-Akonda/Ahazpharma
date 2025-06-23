@@ -148,7 +148,7 @@ const CategoryProductsPage = () => {
       setIsLoginPopupOpen(true);
       setTimeout(() => {
         setIsLoginPopupOpen(false);
-        router.push('/login');
+        router.push('/signup');
       }, 2000);
       return;
     }

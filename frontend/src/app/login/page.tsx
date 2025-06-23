@@ -23,7 +23,6 @@ interface ResetPasswordForm {
   newPassword: string;
 }
 
-// const API_URL = 'http://localhost:5001';
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function LoginPage() {
@@ -59,7 +58,6 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       setErrorMessage(null);
-      // console.log('LoginPage: Sending login request:', data);
       const response = await axios.post<{ accessToken: string }>(`${API_URL}/users/login`, {
         email: data.email,
         password: data.password,
@@ -75,10 +73,8 @@ export default function LoginPage() {
       router.push('/');
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
-        // console.error('LoginPage: Error:', err.response?.data || err.message);
         setErrorMessage(err.response?.data?.message || 'Login failed. Please try again.');
       } else {
-        // console.error('LoginPage: Error:', err);
         setErrorMessage('An unexpected error occurred.');
       }
     } finally {
@@ -90,16 +86,13 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       setErrorMessage(null);
-      // console.log('LoginPage: Sending reset code request:', data);
       await axios.post(`${API_URL}/users/send-reset-code`, { email: data.email });
       setForgotEmail(data.email);
       setStep('verify');
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
-        // console.error('LoginPage: Send reset code error:', err.response?.data || err.message);
         setErrorMessage(err.response?.data?.message || 'Failed to send verification code. Please try again.');
       } else {
-        // console.error('LoginPage: Send reset code error:', err);
         setErrorMessage('An unexpected error occurred.');
       }
     } finally {
@@ -111,7 +104,6 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       setErrorMessage(null);
-      // console.log('LoginPage: Verifying code:', forgotEmail, 'code:', data.code);
       await axios.post(`${API_URL}/users/verify-reset-code`, {
         email: forgotEmail,
         code: data.code,
@@ -120,10 +112,8 @@ export default function LoginPage() {
       setStep('reset');
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
-        // console.error('LoginPage: Verify error:', err.response?.data || err.message);
         setErrorMessage(err.response?.data?.message || 'Invalid or expired verification code.');
       } else {
-        // console.error('LoginPage: Verify error:', err);
         setErrorMessage('An unexpected error occurred.');
       }
     } finally {
@@ -135,7 +125,6 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       setErrorMessage(null);
-      // console.log('LoginPage: Resetting password:', forgotEmail, 'code:', resetCode, 'newPassword:', data.newPassword);
       // await axios.post(`${API_URL}/users/reset-password`, {
       //   code: resetCode,
       //   newPassword: data.newPassword,
@@ -161,58 +150,57 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[url('/signup_img_2.png')] bg-cover bg-center bg-fixed flex items-center justify-center p-4 sm:p-6 relative">
-      {/* Overlay for readability */}
-      <div className="absolute inset-0 bg-black/30"></div>
+    <div className="min-h-screen bg-[url('/signup_bg_img.jpg')] bg-cover bg-center bg-fixed flex items-center justify-center p-2 sm:p-4 relative">
+      <div className="absolute inset-0 bg-black/40"></div>
       
-      <div className="relative w-full max-w-lg bg-white/90 rounded-2xl shadow-2xl p-6 sm:p-8 md:p-10">
+      <div className="relative w-full max-w-xs sm:max-w-md bg-white/95 rounded-xl shadow-xl p-3 sm:p-6">
         {errorMessage && (
-          <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg border border-red-200 animate-pulse">
+          <div className="mb-3 p-2 bg-red-100 text-red-700 rounded-md border border-red-300 animate-pulse text-sm">
             {errorMessage}
           </div>
         )}
 
         {step === 'login' && (
           <>
-            <h2 className="text-3xl sm:text-4xl font-extrabold mb-6 text-center text-blue-700 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center text-green-700 tracking-tight">
               Welcome Back
             </h2>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
+                <label className="block text-xs font-medium text-gray-800 mb-1">Email Address</label>
                 <input
                   type="email"
                   autoComplete="email"
                   {...register('email', { required: 'Email is required' })}
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all duration-200 bg-gray-50 text-gray-800 placeholder-gray-400"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-200 bg-white text-gray-900 placeholder-gray-500 text-sm"
                   placeholder="Enter your email"
                 />
                 {errors.email && (
-                  <span className="text-red-500 text-sm mt-1">{errors.email.message}</span>
+                  <span className="text-red-600 text-xs mt-1">{errors.email.message}</span>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+                <label className="block text-xs font-medium text-gray-800 mb-1">Password</label>
                 <input
                   type="password"
                   autoComplete="current-password"
                   {...register('password', { required: 'Password is required' })}
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all duration-200 bg-gray-50 text-gray-800 placeholder-gray-400"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-200 bg-white text-gray-900 placeholder-gray-500 text-sm"
                   placeholder="Enter your password"
                 />
                 {errors.password && (
-                  <span className="text-red-500 text-sm mt-1">{errors.password.message}</span>
+                  <span className="text-red-600 text-xs mt-1">{errors.password.message}</span>
                 )}
               </div>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 font-semibold flex items-center justify-center cursor-pointer disabled:bg-blue-400 disabled:cursor-not-allowed"
+                className="w-full bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-all duration-200 transform hover:scale-105 font-medium flex items-center justify-center cursor-pointer disabled:bg-green-400 disabled:cursor-not-allowed text-sm"
               >
                 {isLoading ? (
                   <span className="flex items-center">
                     <svg
-                      className="animate-spin h-5 w-5 mr-2 text-white"
+                      className="animate-spin h-4 w-4 mr-2 text-white"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -238,18 +226,18 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
-            <p className="mt-4 text-center text-gray-600 text-sm">
+            <p className="mt-3 text-center text-gray-700 text-xs">
               <button
                 type="button"
                 onClick={() => setStep('forgot')}
-                className="text-blue-600 hover:underline font-medium"
+                className="text-green-600 hover:underline font-medium"
               >
                 Forgot Password?
               </button>
             </p>
-            <p className="mt-2 text-center text-gray-600 text-sm">
+            <p className="mt-2 text-center text-gray-700 text-xs">
               Don’t have an account?{' '}
-              <Link href="/signup" className="text-blue-600 hover:underline font-medium">
+              <Link href="/signup" className="text-green-600 hover:underline font-medium">
                 Sign up
               </Link>
             </p>
@@ -258,35 +246,35 @@ export default function LoginPage() {
 
         {step === 'forgot' && (
           <>
-            <h2 className="text-3xl sm:text-4xl font-extrabold mb-6 text-center text-blue-700 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center text-green-700 tracking-tight">
               Forgot Password
             </h2>
-            <p className="text-gray-600 text-center mb-4 text-sm">
+            <p className="text-gray-700 text-center mb-3 text-xs">
               Enter your email to receive a 6-digit verification code.
             </p>
-            <form onSubmit={handleSubmitForgot(onForgotSubmit)} className="space-y-5">
+            <form onSubmit={handleSubmitForgot(onForgotSubmit)} className="space-y-3">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
+                <label className="block text-xs font-medium text-gray-800 mb-1">Email Address</label>
                 <input
                   type="email"
                   autoComplete="email"
                   {...registerForgot('email', { required: 'Email is required' })}
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all duration-200 bg-gray-50 text-gray-800 placeholder-gray-400"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-200 bg-white text-gray-900 placeholder-gray-500 text-sm"
                   placeholder="Enter your email"
                 />
                 {forgotErrors.email && (
-                  <span className="text-red-500 text-sm mt-1">{forgotErrors.email.message}</span>
+                  <span className="text-red-600 text-xs mt-1">{forgotErrors.email.message}</span>
                 )}
               </div>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 font-semibold flex items-center justify-center cursor-pointer disabled:bg-blue-400 disabled:cursor-not-allowed"
+                className="w-full bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-all duration-200 transform hover:scale-105 font-medium flex items-center justify-center cursor-pointer disabled:bg-green-400 disabled:cursor-not-allowed text-sm"
               >
                 {isLoading ? (
                   <span className="flex items-center">
                     <svg
-                      className="animate-spin h-5 w-5 mr-2 text-white"
+                      className="animate-spin h-4 w-4 mr-2 text-white"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -312,11 +300,11 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
-            <p className="mt-4 text-center text-gray-600 text-sm">
+            <p className="mt-3 text-center text-gray-700 text-xs">
               <button
                 type="button"
                 onClick={() => setStep('login')}
-                className="text-blue-600 hover:underline font-medium"
+                className="text-green-600 hover:underline font-medium"
               >
                 Back to Login
               </button>
@@ -326,15 +314,15 @@ export default function LoginPage() {
 
         {step === 'verify' && (
           <>
-            <h2 className="text-3xl sm:text-4xl font-extrabold mb-6 text-center text-blue-700 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center text-green-700 tracking-tight">
               Enter Verification Code
             </h2>
-            <p className="text-gray-600 text-center mb-4 text-sm">
+            <p className="text-gray-700 text-center mb-3 text-xs">
               We’ve sent a 6-digit code to <span className="font-medium">{forgotEmail}</span>. Please check your inbox or spam folder.
             </p>
-            <form onSubmit={handleSubmitCode(onVerifySubmit)} className="space-y-5">
+            <form onSubmit={handleSubmitCode(onVerifySubmit)} className="space-y-3">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-medium text-gray-800 mb-1">
                   6-Digit Verification Code
                 </label>
                 <input
@@ -348,22 +336,22 @@ export default function LoginPage() {
                       message: 'Code must be a 6-digit number',
                     },
                   })}
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all duration-200 bg-gray-50 text-gray-800 placeholder-gray-400"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-200 bg-white text-gray-900 placeholder-gray-500 text-sm"
                   maxLength={6}
                 />
                 {codeErrors.code && (
-                  <span className="text-red-500 text-sm mt-1">{codeErrors.code.message}</span>
+                  <span className="text-red-600 text-xs mt-1">{codeErrors.code.message}</span>
                 )}
               </div>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 font-semibold flex items-center justify-center cursor-pointer disabled:bg-blue-400 disabled:cursor-not-allowed"
+                className="w-full bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-all duration-200 transform hover:scale-105 font-medium flex items-center justify-center cursor-pointer disabled:bg-green-400 disabled:cursor-not-allowed text-sm"
               >
                 {isLoading ? (
                   <span className="flex items-center">
                     <svg
-                      className="animate-spin h-5 w-5 mr-2 text-white"
+                      className="animate-spin h-4 w-4 mr-2 text-white"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -389,20 +377,20 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
-            <p className="mt-4 text-center text-gray-600 text-sm">
+            <p className="mt-3 text-center text-gray-700 text-xs">
               <button
                 type="button"
                 onClick={() => setStep('forgot')}
-                className="text-blue-600 hover:underline font-medium"
+                className="text-green-600 hover:underline font-medium"
               >
                 Resend Code
               </button>
             </p>
-            <p className="mt-2 text-center text-gray-600 text-sm">
+            <p className="mt-2 text-center text-gray-700 text-xs">
               <button
                 type="button"
                 onClick={() => setStep('login')}
-                className="text-blue-600 hover:underline font-medium"
+                className="text-green-600 hover:underline font-medium"
               >
                 Back to Login
               </button>
@@ -412,13 +400,13 @@ export default function LoginPage() {
 
         {step === 'reset' && (
           <>
-            <h2 className="text-3xl sm:text-4xl font-extrabold mb-6 text-center text-blue-700 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center text-green-700 tracking-tight">
               Reset Password
             </h2>
-            <p className="text-gray-600 text-center mb-4 text-sm">Enter your new password.</p>
-            <form onSubmit={handleSubmitReset(onResetSubmit)} className="space-y-5">
+            <p className="text-gray-700 text-center mb-3 text-xs">Enter your new password.</p>
+            <form onSubmit={handleSubmitReset(onResetSubmit)} className="space-y-3">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">New Password</label>
+                <label className="block text-xs font-medium text-gray-800 mb-1">New Password</label>
                 <input
                   type="password"
                   autoComplete="new-password"
@@ -426,22 +414,22 @@ export default function LoginPage() {
                     required: 'New password is required',
                     minLength: { value: 6, message: 'Password must be at least 6 characters' },
                   })}
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all duration-200 bg-gray-50 text-gray-800 placeholder-gray-400"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-200 bg-white text-gray-900 placeholder-gray-500 text-sm"
                   placeholder="Enter your new password"
                 />
                 {resetErrors.newPassword && (
-                  <span className="text-red-500 text-sm mt-1">{resetErrors.newPassword.message}</span>
+                  <span className="text-red-600 text-xs mt-1">{resetErrors.newPassword.message}</span>
                 )}
               </div>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 font-semibold flex items-center justify-center cursor-pointer disabled:bg-blue-400 disabled:cursor-not-allowed"
+                className="w-full bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-all duration-200 transform hover:scale-105 font-medium flex items-center justify-center cursor-pointer disabled:bg-green-400 disabled:cursor-not-allowed text-sm"
               >
                 {isLoading ? (
                   <span className="flex items-center">
                     <svg
-                      className="animate-spin h-5 w-5 mr-2 text-white"
+                      className="animate-spin h-4 w-4 mr-2 text-white"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -467,11 +455,11 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
-            <p className="mt-4 text-center text-gray-600 text-sm">
+            <p className="mt-3 text-center text-gray-700 text-xs">
               <button
                 type="button"
                 onClick={() => setStep('login')}
-                className="text-blue-600 hover:underline font-medium"
+                className="text-green-600 hover:underline font-medium"
               >
                 Back to Login
               </button>
@@ -481,10 +469,10 @@ export default function LoginPage() {
 
         {showSuccessPopup && (
           <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-            <div className="bg-green-50 p-8 rounded-2xl shadow-2xl max-w-sm w-full animate-[bounce_0.6s_ease-in-out] border border-green-200">
-              <div className="flex justify-center mb-4">
+            <div className="bg-white p-6 rounded-xl shadow-xl max-w-xs w-full animate-[bounce_0.6s_ease-in-out] border border-green-300">
+              <div className="flex justify-center mb-3">
                 <svg
-                  className="h-12 w-12 text-green-600"
+                  className="h-8 w-8 text-green-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -498,10 +486,10 @@ export default function LoginPage() {
                   ></path>
                 </svg>
               </div>
-              <h2 className="text-2xl font-semibold text-green-700 text-center font-sans">
+              <h2 className="text-lg font-semibold text-green-700 text-center">
                 Password Reset Successful!
               </h2>
-              <p className="text-gray-600 text-center mt-4 font-sans text-base">
+              <p className="text-gray-700 text-center mt-2 text-sm">
                 Redirecting to login in 3 seconds...
               </p>
             </div>
@@ -509,5 +497,5 @@ export default function LoginPage() {
         )}
       </div>
     </div>
-  );
+  ); 
 }

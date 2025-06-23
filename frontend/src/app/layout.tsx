@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import Navbar from './components/Navbar';
 import Footer from './components/footer';
+import SearchBox from './components/searchBox'; // ✅ make sure this is the correct path
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,9 +21,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Navbar />
-       
+        <SearchBox /> {/* ✅ Uppercase component usage */}
         {children}
-         <Footer />
+        <Footer />
       </body>
     </html>
   );

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Query,BadRequestException } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -54,11 +54,26 @@ export class ProductsController {
     return this.productsService.remove(+id);
   }
 
-  @Get('search/name')
-  searchByName(@Query('name') name: string): Promise<Product[]> {
-    return this.productsService.searchByName(name);
-  }
+  // @Get('search/name')
+  // searchByName(@Query('name') name: string): Promise<Product[]> {
+  //   return this.productsService.searchByName(name);
+  // }
 
+
+    @Get('search/name')
+  async searchByName(@Query('name') name: string): Promise<Product[]> {
+    console.log(`Received search request for name: ${name}`);
+    if (!name || name.trim() === '') {
+      console.log('Empty search term, returning empty array');
+      return [];
+    }
+    try {
+      return await this.productsService.searchByName(name);
+    } catch (error) {
+      console.error('Error in searchByName controller:', error);
+      throw new BadRequestException('Failed to search products');
+    }
+  }
   @Get('category/:categoryId')
   findByCategory(@Param('categoryId') categoryId: string): Promise<Product[]> {
     return this.productsService.findByCategory(+categoryId);
