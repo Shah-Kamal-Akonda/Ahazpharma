@@ -11,9 +11,13 @@ import { Product, CartItem, Address } from '@/app/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const SearchResultsPage = () => {
+interface SearchResultsClientProps {
+  initialQuery: string;
+}
+
+const SearchResultsClient: React.FC<SearchResultsClientProps> = ({ initialQuery }) => {
   const searchParams = useSearchParams();
-  const query = searchParams.get('query') || '';
+  const query = searchParams.get('query') || initialQuery;
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -221,7 +225,7 @@ const SearchResultsPage = () => {
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-b from-blue-50 to-white p-8 transition-all duration-300 ${isCartOpen ? 'sm:pr-80' : ''} font-poppins}`}>
+    <div className={`min-h-screen bg-gradient-to-b from-blue-50 to-white p-8 transition-all duration-300 ${isCartOpen ? 'sm:pr-80' : ''} font-poppins`}>
       <h1 className="text-4xl font-extrabold text-gray-800 text-center mb-10">Search Results for "{query}"</h1>
 
       {errorMessage && (
@@ -229,7 +233,7 @@ const SearchResultsPage = () => {
       )}
 
       {isLoginPopupOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-100 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-white p-10 rounded-2xl shadow-2xl max-w-sm w-full">
             <div className="flex justify-center mb-6">
               <svg className="w-16 h-16 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -328,4 +332,4 @@ const SearchResultsPage = () => {
   );
 };
 
-export default SearchResultsPage;
+export default SearchResultsClient;
