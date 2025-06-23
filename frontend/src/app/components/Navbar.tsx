@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,16 +8,9 @@ import axios from 'axios';
 import { ArrowRightOnRectangleIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 
-import dynamic from 'next/dynamic';
-
-// Lazy-load SearchBox to defer client-side rendering
-const SearchBox = dynamic(() => import('./searchBox'), {
-  ssr: false, // Disable server-side rendering for SearchBox
-  loading: () => <div className="w-full max-w-sm h-10 bg-gray-200 rounded-lg animate-pulse" />,
-});
-
 export default function Navbar() {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,7 +30,7 @@ export default function Navbar() {
 
     setToken(accessToken);
 
-    if (pathname === '/' || pathname === '/components/ContactUs' || pathname === '/components/AboutUs' || pathname === '/login' || pathname === '/signup' || pathname.startsWith('/products')) {
+    if (pathname === '/' || pathname === '/components/ContactUs' || pathname === '/components/AboutUs'  || pathname === '/login' || pathname === '/signup' || pathname.startsWith('/products')) {
       if (accessToken) {
         const fetchUser = async () => {
           try {
@@ -130,13 +124,13 @@ export default function Navbar() {
         <div className="container mx-auto flex justify-between items-center">
           <Link href="/" className="relative w-[120px] h-[50px]">
             <Image
-              src="/Ahazpharma_logo.png"
+              src="/Ahazpharma_logo.jpg"
               alt="Ahaz Pharma Logo"
               fill
               className="object-contain"
             />
           </Link>
-          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold text-sm">
+          <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold text-xs">
             U
           </div>
         </div>
@@ -145,119 +139,36 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="w-full bg-white text-gray-800 p-4 shadow-lg font-poppins">
-      <div className="container mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        {/* Logo */}
-        <div className="flex items-center justify-between md:w-auto">
-          <Link href="/" className="relative w-[120px] h-[50px]">
-            <Image
-              src="/Ahazpharma_logo.png"
-              alt="Ahaz Pharma Logo"
-              fill
-              className="object-contain"
-            />
-          </Link>
-          <div className="md:hidden flex items-center space-x-3">
-            <div className="relative">
-              <div
-                className="w-8 h-8 rounded-full bg-green-200 flex items-center justify-center text-green-700 text-sm font-bold cursor-pointer hover:bg-green-300 transition-all duration-300 shadow-sm"
-                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-              >
-                {getInitials(userEmail)}
-              </div>
-              {isProfileDropdownOpen && (
-                <div
-                  className="absolute left-1/2 -translate-x-1/2 top-10 mt-2 w-40 bg-white text-gray-800 rounded-lg shadow-xl transform transition-all duration-300 z-20"
-                >
-                  {token ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          handleProfileClick();
-                          setIsProfileDropdownOpen(false);
-                        }}
-                        className="block w-full text-left px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-green-100 hover:text-green-600 rounded-t-lg transition-colors duration-200"
-                      >
-                        Profile
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          handleLogout();
-                          setIsProfileDropdownOpen(false);
-                        }}
-                        className="w-full text-left px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-green-100 hover:text-green-600 rounded-b-lg transition-colors duration-200 flex items-center"
-                      >
-                        <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
-                        Logout
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleSignUpClick();
-                        setIsProfileDropdownOpen(false);
-                      }}
-                      className="block w-full text-left px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
-                    >
-                      Sign Up
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="focus:outline-none"
-            >
-              {isMobileMenuOpen ? (
-                <XMarkIcon className="h-6 w-6 text-gray-700 hover:text-green-600 transition-colors duration-200" />
-              ) : (
-                <Bars3Icon className="h-6 w-6 text-gray-700 hover:text-green-600 transition-colors duration-200" />
-              )}
-            </button>
-          </div>
-        </div>
+    <nav className="w-full bg-white text-gray-800 p-3 shadow-lg font-poppins">
+      <div className="container mx-auto flex justify-between items-center">
+        <Link href="/" className="relative w-[120px] h-[50px]">
+          <Image
+            src="/Ahazpharma_logo.png"
+            alt="Ahaz Pharma Logo"
+            fill
+            className="object-contain"
+          />
+        </Link>
 
-        {/* SearchBox (Centered on Desktop) */}
-        <div className="flex-1 max-w-sm mx-auto md:block hidden">
-          <SearchBox />
-        </div>
-
-        {/* Desktop Navigation and Profile */}
         <div className="hidden md:flex items-center space-x-8">
           <div className="flex space-x-6">
-            <Link
-              href="/"
-              className="text-base font-medium text-gray-700 hover:text-green-600 transition-colors duration-300 hover:scale-105"
-            >
+            <Link href="/" className="text-base font-medium text-gray-700 hover:text-green-600 transition-colors duration-300 hover:scale-105">
               Home
             </Link>
-            <Link
-              href="/products"
-              className="text-base font-medium text-gray-700 hover:text-green-600 transition-colors duration-300 hover:scale-105"
-            >
+            <Link href="/products" className="text-base font-medium text-gray-700 hover:text-green-600 transition-colors duration-300 hover:scale-105">
               Products
             </Link>
-            <Link
-              href="/components/ContactUs"
-              className="text-base font-medium text-gray-700 hover:text-green-600 transition-colors duration-300 hover:scale-105"
-            >
+            <Link href="/components/ContactUs" className="text-base font-medium text-gray-700 hover:text-green-600 transition-colors duration-300 hover:scale-105">
               Contact
             </Link>
-            <Link
-              href="/components/AboutUs"
-              className="text-base font-medium text-gray-700 hover:text-green-600 transition-colors duration-300 hover:scale-105"
-            >
+            <Link href="/components/AboutUs" className="text-base font-medium text-gray-700 hover:text-green-600 transition-colors duration-300 hover:scale-105">
               About
             </Link>
           </div>
 
           <div className="relative">
             <div
-              className="w-12 h-12 rounded-full bg-green-200 flex items-center justify-center text-green-700 text-lg font-bold cursor-pointer hover:bg-green-300 transition-all duration-300 shadow-sm"
+              className="w-10 h-10 rounded-full bg-green-200 flex items-center justify-center text-green-700 text-base font-bold cursor-pointer hover:bg-green-300 transition-all duration-300 shadow-sm"
               onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
             >
               {getInitials(userEmail)}
@@ -299,45 +210,100 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile SearchBox */}
-        <div className="md:hidden mt-2">
-          <SearchBox />
-        </div>
-        
-
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden mt-4 bg-white rounded-lg shadow-xl p-4">
-            <Link
-              href="/"
-              className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
-              onClick={() => setIsMobileMenuOpen(false)}
+        <div className="flex items-center space-x-3 md:hidden">
+          <div className="relative">
+            <div
+              className="w-6 h-6 rounded-full bg-green-200 flex items-center justify-center text-green-700 text-xs font-bold cursor-pointer hover:bg-green-300 transition-all duration-300 shadow-sm"
+              onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
             >
-              Home
-            </Link>
-            <Link
-              href="/products"
-              className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
-            >
-              Products
-            </Link>
-            <Link
-              href="/components/ContactUs"
-              className="text-lg font-medium block px-4 py-2 text-gray-900 hover:bg-green-600 hover:text-white rounded-lg transition-colors duration-200"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Contact
-            </Link>
-            <Link
-              href="/components/AboutUs"
-              className="text-lg font-medium block px-4 py-2 text-gray-900 hover:bg-green-600 hover:text-white rounded-lg transition-colors duration-200"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              About
-            </Link>
+              {getInitials(userEmail)}
+            </div>
+            {isProfileDropdownOpen && (
+              <div
+                className="absolute left-1/2 -translate-x-1/2 top-7 mt-2 w-40 bg-white text-gray-800 rounded-lg shadow-xl transform transition-all duration-300 z-20"
+              >
+                {token ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleProfileClick();
+                        setIsProfileDropdownOpen(false);
+                      }}
+                      className="block w-full text-left px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-green-100 hover:text-green-600 rounded-t-lg transition-colors duration-200"
+                    >
+                      Profile
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleLogout();
+                        setIsProfileDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-green-100 hover:text-green-600 rounded-b-lg transition-colors duration-200 flex items-center"
+                    >
+                      <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleSignUpClick();
+                      setIsProfileDropdownOpen(false);
+                    }}
+                    className="block w-full text-left px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
+                  >
+                    Sign Up
+                  </button>
+                )}
+              </div>
+            )}
           </div>
-        )}
+
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="focus:outline-none">
+            {isMobileMenuOpen ? (
+              <XMarkIcon className="h-6 w-6 text-gray-700 hover:text-green-600 transition-colors duration-200" />
+            ) : (
+              <Bars3Icon className="h-6 w-6 text-gray-700 hover:text-green-600 transition-colors duration-200" />
+            )}
+          </button>
+        </div>
       </div>
+
+      {isMobileMenuOpen && (
+        <div className="md:hidden mt-4 bg-white rounded-lg shadow-xl p-4">
+          <Link
+            href="/"
+            className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Home
+          </Link>
+          <Link
+            href="/products"
+            className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Products
+          </Link>
+          <Link
+            href="/components/ContactUs"
+            className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Contact
+          </Link>
+          <Link
+            href="/components/AboutUs"
+            className="block px-4 py-2 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-600 rounded-lg transition-colors duration-200"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            About
+          </Link>
+        </div>
+      )}
     </nav>
   );
 }
