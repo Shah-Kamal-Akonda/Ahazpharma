@@ -6,13 +6,14 @@ import { useRouter, usePathname } from 'next/navigation';
 import axios from 'axios';
 import { ArrowRightOnRectangleIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import dynamic from 'next/dynamic';
+import SearchBox from './searchBox';
+// import dynamic from 'next/dynamic';
 
 // Lazy-load SearchBox to defer client-side rendering
-const SearchBox = dynamic(() => import('./searchBox'), {
-  ssr: false, // Disable server-side rendering for SearchBox
-  loading: () => <div className="w-full max-w-sm h-10 bg-gray-200 rounded-lg animate-pulse" />,
-});
+// const SearchBox = dynamic(() => import('./searchBox'), {
+//   ssr: false, // Disable server-side rendering for SearchBox
+//   loading: () => <div className="w-full max-w-sm h-10 bg-gray-200 rounded-lg animate-pulse" />,
+// });
 
 export default function Navbar() {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -302,6 +303,7 @@ export default function Navbar() {
         <div className="md:hidden mt-2">
           <SearchBox />
         </div>
+        
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
