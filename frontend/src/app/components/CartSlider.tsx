@@ -43,7 +43,7 @@ const CartSlider: React.FC<CartSliderProps> = ({
     <>
       {/* Toggle Button for Larger Screens */}
       <button
-        className="sm:block hidden fixed top-20 right-4 w-12 h-12 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full shadow-xl  items-center justify-center hover:scale-110 hover:animate-pulse transition-all duration-200 z-50"
+        className="sm:block hidden fixed top-30 right-6 w-12 h-12 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full shadow-xl  items-center justify-center hover:scale-110 hover:animate-pulse transition-all duration-200 z-50"
         onClick={() => setIsOpen(!isOpen)}
       >
         <ShoppingBagIcon className="w-6 h-6 opacity-90" />
