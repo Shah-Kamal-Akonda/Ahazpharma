@@ -1,129 +1,127 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
+import axios, { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  quantityUnit: 'ML' | 'GM';
-  image?: string;
-  description: string;
-  category?: { id: number; name: string };
-  categoryId?: number;
-}
+import { Product } from '@/app/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const SearchBox: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<Product[]>([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isFocused, setIsFocused] = useState(false);
   const router = useRouter();
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Debounce search to avoid excessive API calls
+  // Fetch suggestions with debouncing
   useEffect(() => {
-    const delayDebounceFn = setTimeout(async () => {
-      if (searchTerm.trim() === '') {
-        setSearchResults([]);
-        setIsDropdownOpen(false);
-        return;
-      }
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
 
+    if (searchTerm.trim() === '') {
+      setSuggestions([]);
+      setError(null);
+      return;
+    }
+
+    debounceRef.current = setTimeout(async () => {
       try {
-        console.log(`Searching for: ${searchTerm}`);
-        const response = await axios.get(`${API_URL}/products/search/name`, {
-          params: { name: searchTerm },
-        });
-        console.log('Search response:', response.data);
-        setSearchResults(response.data);
-        setIsDropdownOpen(true);
+        const response = await axios.get(`${API_URL}/products/search/name?name=${encodeURIComponent(searchTerm)}`);
+        setSuggestions(response.data.slice(0, 5)); // Limit to 5 suggestions
         setError(null);
-      } catch (err: any) {
-        console.error('Error searching products:', err.response?.data || err.message);
-        setError('Failed to search products. Please try again.');
-        setSearchResults([]);
-        setIsDropdownOpen(false);
+      } catch (err: unknown) {
+        if (err instanceof AxiosError) {
+          console.error('Error fetching suggestions:', err.message, err.response?.data);
+          setError('Failed to fetch suggestions.');
+        } else {
+          console.error('Unexpected error:', err);
+          setError('An unexpected error occurred.');
+        }
+        setSuggestions([]);
       }
     }, 300);
 
-    return () => clearTimeout(delayDebounceFn);
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
   }, [searchTerm]);
 
-  // Close dropdown when clicking outside
+  // Handle click outside to hide suggestions
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setTimeout(() => setIsFocused(false), 200);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleProductClick = (productId: number) => {
-    setIsDropdownOpen(false);
-    setSearchTerm('');
-    router.push(`/products/${productId}`);
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchTerm.trim()) {
+      setError('Please enter a product name.');
+      return;
+    }
+    setIsFocused(false);
+    router.push(`/products/search?query=${encodeURIComponent(searchTerm)}`);
+  };
+
+  const handleSuggestionClick = (product: Product) => {
+    setSearchTerm(product.name);
+    setSuggestions([]);
+    setIsFocused(false);
+    router.push(`/products/search?query=${encodeURIComponent(product.name)}`);
   };
 
   return (
-    <div className="relative w-full max-w-md mx-auto font-poppins">
-      <div className="relative">
+    <div ref={wrapperRef} className="relative w-full max-w-md mx-auto mb-6 font-poppins">
+      <form onSubmit={handleSearch} className="flex items-center">
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search products..."
-          className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800"
+          onFocus={() => setIsFocused(true)}
+          placeholder="Search products by name..."
+          className="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
-        <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
-      </div>
-
-      {error && (
-        <div className="mt-2 p-2 bg-red-100 text-red-700 rounded-lg text-sm">
-          {error}
-        </div>
-      )}
-
-      {isDropdownOpen && searchResults.length > 0 && (
-        <div
-          ref={dropdownRef}
-          className="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl max-h-96 overflow-y-auto z-50"
+        <button
+          type="submit"
+          className="ml-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200"
         >
-          {searchResults.map((product) => (
-            <div
+          Search
+        </button>
+      </form>
+      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {isFocused && suggestions.length > 0 && (
+        <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+          {suggestions.map((product) => (
+            <li
               key={product.id}
-              onClick={() => handleProductClick(product.id)}
-              className="flex items-center space-x-4 p-3 hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors duration-200"
+              onClick={() => handleSuggestionClick(product)}
+              className="px-4 py-2 text-gray-700 hover:bg-blue-100 cursor-pointer flex items-center"
             >
               {product.image ? (
-                <Image
+                <img
                   src={`${API_URL}${product.image}`}
                   alt={product.name}
-                  width={40}
-                  height={40}
-                  className="rounded-md object-cover"
+                  className="w-8 h-8 object-cover rounded mr-2"
                 />
               ) : (
-                <div className="w-10 h-10 bg-gray-200 rounded-md flex items-center justify-center">
-                  <span className="text-gray-500 text-xs">No Image</span>
+                <div className="w-8 h-8 bg-gray-200 rounded mr-2 flex items-center justify-center">
+                  <span className="text-xs text-gray-500">No Img</span>
                 </div>
               )}
-              <div className="flex-1">
-                <h3 className="text-sm font-semibold text-gray-800">{product.name}</h3>
-                <p className="text-xs text-gray-600">${product.price.toFixed(2)}</p>
-              </div>
-            </div>
+              <span>{product.name}</span>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );
