@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useToast } from '../components/ToastNotification';
 
 // Interfaces matching backend DTOs
 interface Category {
@@ -57,11 +58,11 @@ interface UpdateProductDto {
 }
 
 // API base URL
-// const API_URL = 'http://localhost:5001';
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Main Admin Panel Component
 const AdminPanel = () => {
+  const { showToast } = useToast(); // Added useToast hook
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -90,6 +91,7 @@ const AdminPanel = () => {
     const hasAdminAccess = sessionStorage.getItem('adminAccess') === 'true';
     if (!hasAdminAccess) {
       console.log('AdminPanel: Unauthorized access, redirecting to /login');
+      showToast('Unauthorized access', 'error'); // Added toast for unauthorized access
       router.push('/login');
       return;
     }
@@ -102,6 +104,7 @@ const AdminPanel = () => {
 
     if (!token) {
       console.log('AdminPanel: No token, redirecting to /login');
+      showToast('No authentication token found', 'error'); // Added toast for missing token
       sessionStorage.removeItem('adminAccess');
       router.push('/login');
       return;
@@ -115,11 +118,13 @@ const AdminPanel = () => {
         });
         if (res.data.email !== 'shahkamalakonda@gmail.com') {
           console.log('AdminPanel: Not admin user, redirecting to /login');
+          showToast('Access denied: Not an admin user', 'error'); // Added toast for non-admin user
           sessionStorage.removeItem('adminAccess');
           router.push('/login');
         }
       } catch (err) {
         console.error('AdminPanel: Failed to verify user:', err);
+        showToast('Failed to verify user', 'error'); // Added toast for verification failure
         sessionStorage.removeItem('adminAccess');
         router.push('/login');
       }
@@ -144,6 +149,7 @@ const AdminPanel = () => {
       } catch (error) {
         console.error('Error fetching categories:', error);
         setError('Failed to fetch categories');
+        showToast('Failed to fetch categories', 'error'); // Added toast for fetch failure
       }
     };
 
@@ -156,6 +162,7 @@ const AdminPanel = () => {
       } catch (error) {
         console.error('Error fetching products:', error);
         setError('Failed to fetch products');
+        showToast('Failed to fetch products', 'error'); // Added toast for fetch failure
       }
     };
 
@@ -183,6 +190,7 @@ const AdminPanel = () => {
     } catch (error) {
       console.error('Error uploading category image:', error);
       setError('Failed to upload category image');
+      showToast('Failed to upload category image', 'error'); // Added toast for upload failure
       return null;
     }
   };
@@ -207,6 +215,7 @@ const AdminPanel = () => {
     } catch (error) {
       console.error('Error uploading product image:', error);
       setError('Failed to upload product image');
+      showToast('Failed to upload product image', 'error'); // Added toast for upload failure
       return null;
     }
   };
@@ -233,6 +242,7 @@ const AdminPanel = () => {
         );
         setCategories(categories.map((cat) => (cat.id === editingCategory.id ? response.data : cat)));
         setEditingCategory(null);
+        showToast('Category updated successfully', 'success'); // Added toast for update success
       } else {
         const response = await axios.post(
           `${API_URL}/categories`,
@@ -240,12 +250,14 @@ const AdminPanel = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setCategories([...categories, response.data]);
+        showToast('Category created successfully', 'success'); // Added toast for create success
       }
       categoryForm.reset();
       setCategoryImage(null);
     } catch (error) {
       console.error('Error saving category:', error);
       setError('Failed to save category');
+      showToast('Failed to save category', 'error'); // Added toast for save failure
     }
   };
 
@@ -271,6 +283,7 @@ const AdminPanel = () => {
         );
         setProducts(products.map((prod) => (prod.id === editingProduct.id ? response.data : prod)));
         setEditingProduct(null);
+        showToast('Product updated successfully', 'success'); // Added toast for update success
       } else {
         const response = await axios.post(
           `${API_URL}/products`,
@@ -278,12 +291,14 @@ const AdminPanel = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setProducts([...products, response.data]);
+        showToast('Product created successfully', 'success'); // Added toast for create success
       }
       productForm.reset();
       setProductImage(null);
     } catch (error) {
       console.error('Error saving product:', error);
       setError('Failed to save product');
+      showToast('Failed to save product', 'error'); // Added toast for save failure
     }
   };
 
@@ -305,9 +320,11 @@ const AdminPanel = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCategories(categories.filter((cat) => cat.id !== id));
+      showToast('Category deleted successfully', 'success'); // Added toast for delete success
     } catch (error) {
       console.error('Error deleting category:', error);
       setError('Failed to delete category');
+      showToast('Failed to delete category', 'error'); // Added toast for delete failure
     }
   };
 
@@ -337,9 +354,11 @@ const AdminPanel = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(products.filter((prod) => prod.id !== id));
+      showToast('Product deleted successfully', 'success'); // Added toast for delete success
     } catch (error) {
       console.error('Error deleting product:', error);
       setError('Failed to delete product');
+      showToast('Failed to delete product', 'error'); // Added toast for delete failure
     }
   };
 
