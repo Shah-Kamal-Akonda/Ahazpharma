@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios, { AxiosError } from 'axios';
+import { useToast } from '../components/ToastNotification';
 
 interface User {
   id: string;
@@ -26,6 +27,7 @@ interface Address {
 }
 
 export default function UserProfile() {
+  const { showToast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [updateData, setUpdateData] = useState({
     name: '',
@@ -50,7 +52,6 @@ export default function UserProfile() {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  // const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   // Get token safely
@@ -62,76 +63,17 @@ export default function UserProfile() {
       ?.split('=')[1];
   };
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const token = getToken();
-      if (!token) {
-        setError('No authentication token found');
-        router.push('/login');
-        return;
-      }
-
-      try {
-        const res = await axios.get(`${API_URL}/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUser(res.data);
-        setUpdateData({
-          name: res.data.name,
-          email: res.data.email,
-          phoneNumber: res.data.phoneNumber || '',
-          password: '',
-          gender: res.data.gender || '',
-        });
-      } catch (err: unknown) {
-        if (err instanceof AxiosError) {
-          console.error('Error fetching profile:', err.message, err.response?.data);
-          setError(err.response?.data?.message || 'Failed to load profile');
-        } else {
-          console.error('Error fetching profile:', err);
-          setError('An unexpected error occurred');
-        }
-        router.push('/login');
-      }
-    };
-
-    const fetchDivisions = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/users/divisions`);
-        setDivisions(res.data);
-      } catch (err: unknown) {
-        if (err instanceof AxiosError) {
-          console.error('Error fetching divisions:', err.message, err.response?.data);
-          setError(err.response?.data?.message || 'Failed to load divisions');
-        } else {
-          console.error('Error fetching divisions:', err);
-          setError('An unexpected error occurred');
-        }
-      }
-    };
-
-    fetchProfile();
-    fetchDivisions();
-  }, [router, API_URL]); // Added API_URL to dependencies
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setUpdateData({ ...updateData, [e.target.name]: e.target.value });
-  };
-
-  const handleUpdateProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Fetch user profile
+  const fetchProfile = async () => {
     const token = getToken();
     if (!token) {
       setError('No authentication token found');
+      showToast('No authentication token found', 'error');
       router.push('/login');
       return;
     }
 
     try {
-      await axios.post(`${API_URL}/users/profile`, updateData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
       const res = await axios.get(`${API_URL}/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -143,14 +85,71 @@ export default function UserProfile() {
         password: '',
         gender: res.data.gender || '',
       });
-      alert('Profile updated successfully');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        console.error('Error fetching profile:', err.message, err.response?.data);
+        setError(err.response?.data?.message || 'Failed to load profile');
+        showToast(err.response?.data?.message || 'Failed to load profile', 'error');
+      } else {
+        console.error('Error fetching profile:', err);
+        setError('An unexpected error occurred');
+        showToast('An unexpected error occurred', 'error');
+      }
+      router.push('/login');
+    }
+  };
+
+  useEffect(() => {
+    const fetchDivisions = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/users/divisions`);
+        setDivisions(res.data);
+      } catch (err: unknown) {
+        if (err instanceof AxiosError) {
+          console.error('Error fetching divisions:', err.message, err.response?.data);
+          setError(err.response?.data?.message || 'Failed to load divisions');
+          showToast(err.response?.data?.message || 'Failed to load divisions', 'error');
+        } else {
+          console.error('Error fetching divisions:', err);
+          setError('An unexpected error occurred');
+          showToast('An unexpected error occurred', 'error');
+        }
+      }
+    };
+
+    fetchProfile();
+    fetchDivisions();
+  }, [router, API_URL]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setUpdateData({ ...updateData, [e.target.name]: e.target.value });
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = getToken();
+    if (!token) {
+      setError('No authentication token found');
+      showToast('No authentication token found', 'error');
+      router.push('/login');
+      return;
+    }
+
+    try {
+      await axios.post(`${API_URL}/users/profile`, updateData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      await fetchProfile(); // Refetch profile to ensure state is up-to-date
+      showToast('Profile updated successfully', 'success');
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         console.error('Error updating profile:', err.message, err.response?.data);
         setError(err.response?.data?.message || 'Failed to update profile');
+        showToast(err.response?.data?.message || 'Failed to update profile', 'error');
       } else {
         console.error('Error updating profile:', err);
         setError('An unexpected error occurred');
+        showToast('An unexpected error occurred', 'error');
       }
     }
   };
@@ -178,9 +177,11 @@ export default function UserProfile() {
       if (err instanceof AxiosError) {
         console.error('Error fetching districts:', err.message, err.response?.data);
         setError(err.response?.data?.message || 'Failed to load districts');
+        showToast(err.response?.data?.message || 'Failed to load districts', 'error');
       } else {
         console.error('Error fetching districts:', err);
         setError('An unexpected error occurred');
+        showToast('An unexpected error occurred', 'error');
       }
     }
   };
@@ -193,9 +194,11 @@ export default function UserProfile() {
       if (err instanceof AxiosError) {
         console.error('Error fetching cities:', err.message, err.response?.data);
         setError(err.response?.data?.message || 'Failed to load cities');
+        showToast(err.response?.data?.message || 'Failed to load cities', 'error');
       } else {
         console.error('Error fetching cities:', err);
         setError('An unexpected error occurred');
+        showToast('An unexpected error occurred', 'error');
       }
     }
   };
@@ -205,17 +208,16 @@ export default function UserProfile() {
     const token = getToken();
     if (!token) {
       setError('No authentication token found');
+      showToast('No authentication token found', 'error');
       router.push('/login');
       return;
     }
 
     try {
-      const response = await axios.post(`${API_URL}/users/address`, newAddress, {
+      await axios.post(`${API_URL}/users/address`, newAddress, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUser((prev) =>
-        prev ? { ...prev, addresses: [...prev.addresses, response.data] } : prev,
-      );
+      await fetchProfile(); // Refetch profile to update addresses
       setNewAddress({
         division: '',
         district: '',
@@ -225,14 +227,16 @@ export default function UserProfile() {
         phoneNumber: '',
         email: '',
       });
-      alert('Address created successfully');
+      showToast('Address created successfully', 'success');
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         console.error('Error creating address:', err.message, err.response?.data);
         setError(err.response?.data?.message || 'Failed to create address');
+        showToast(err.response?.data?.message || 'Failed to create address', 'error');
       } else {
         console.error('Error creating address:', err);
         setError('An unexpected error occurred');
+        showToast('An unexpected error occurred', 'error');
       }
     }
   };
@@ -250,6 +254,7 @@ export default function UserProfile() {
     const token = getToken();
     if (!token) {
       setError('No authentication token found');
+      showToast('No authentication token found', 'error');
       router.push('/login');
       return;
     }
@@ -258,16 +263,7 @@ export default function UserProfile() {
       await axios.put(`${API_URL}/users/address/${editingAddress.id}`, newAddress, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUser((prev) =>
-        prev
-          ? {
-              ...prev,
-              addresses: prev.addresses.map((addr) =>
-                addr.id === editingAddress.id ? { ...newAddress, id: editingAddress.id } : addr,
-              ),
-            }
-          : prev,
-      );
+      await fetchProfile(); // Refetch profile to update addresses
       setEditingAddress(null);
       setNewAddress({
         division: '',
@@ -278,14 +274,16 @@ export default function UserProfile() {
         phoneNumber: '',
         email: '',
       });
-      alert('Address updated successfully');
+      showToast('Address updated successfully', 'success');
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         console.error('Error updating address:', err.message, err.response?.data);
         setError(err.response?.data?.message || 'Failed to update address');
+        showToast(err.response?.data?.message || 'Failed to update address', 'error');
       } else {
         console.error('Error updating address:', err);
         setError('An unexpected error occurred');
+        showToast('An unexpected error occurred', 'error');
       }
     }
   };
@@ -294,6 +292,7 @@ export default function UserProfile() {
     const token = getToken();
     if (!token) {
       setError('No authentication token found');
+      showToast('No authentication token found', 'error');
       router.push('/login');
       return;
     }
@@ -302,17 +301,17 @@ export default function UserProfile() {
       await axios.delete(`${API_URL}/users/address/${addressId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUser((prev) =>
-        prev ? { ...prev, addresses: prev.addresses.filter((addr) => addr.id !== addressId) } : prev,
-      );
-      alert('Address deleted successfully');
+      await fetchProfile(); // Refetch profile to update addresses
+      showToast('Address deleted successfully', 'success');
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         console.error('Error deleting address:', err.message, err.response?.data);
         setError(err.response?.data?.message || 'Failed to delete address');
+        showToast(err.response?.data?.message || 'Failed to delete address', 'error');
       } else {
         console.error('Error deleting address:', err);
         setError('An unexpected error occurred');
+        showToast('An unexpected error occurred', 'error');
       }
     }
   };
@@ -518,10 +517,10 @@ export default function UserProfile() {
           ) : (
             user.addresses.map((address) => (
               <div key={address.id} className="border p-4 mb-2 rounded">
-                <p><strong>Recipient:</strong> {address.recipientName}</p>
-                <p><strong>Address:</strong> {address.addressLine}, {address.city}, {address.district}, {address.division}</p>
-                <p><strong>Phone:</strong> {address.phoneNumber}</p>
-                <p><strong>Email:</strong> {address.email}</p>
+                <p><strong>Recipient:</strong> {address.recipientName || 'N/A'}</p>
+                <p><strong>Address:</strong> {address.addressLine || 'N/A'}, {address.city || 'N/A'}, {address.district || 'N/A'}, {address.division || 'N/A'}</p>
+                <p><strong>Phone:</strong> {address.phoneNumber || 'N/A'}</p>
+                <p><strong>Email:</strong> {address.email || 'N/A'}</p>
                 <div className="mt-2 space-x-2">
                   <button
                     onClick={() => handleEditAddress(address)}
