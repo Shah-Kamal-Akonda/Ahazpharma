@@ -37,6 +37,7 @@
 
 
 /** @type {import('next').NextConfig} */
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -44,34 +45,21 @@ const nextConfig = {
         protocol: 'http',
         hostname: 'localhost',
         port: '5001',
-        pathname: '/Uploads/**',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '5001',
-        pathname: '/Uploads/products/**',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '5001',
-        pathname: '/Uploads/*/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'ahazpharma.onrender.com',
-        port: '',
         pathname: '/uploads/**',
       },
       {
         protocol: 'https',
         hostname: 'ahazpharma.onrender.com',
         port: '',
-        pathname: '/uploads/products/**',
+        pathname: '/uploads/**', // Matches /uploads/products/** and other subpaths
+      },
+      {
+        protocol: 'https',
+        hostname: 'ahazpharma.onrender.com',
+        port: '',
+        pathname: '/uploads/**', // Added to handle case-insensitive paths
       },
     ],
-    domains: ['localhost', 'ahazpharma.onrender.com'], // Legacy support for older Next.js versions
   },
   eslint: {
     ignoreDuringBuilds: true, // Avoid ESLint build errors in Vercel
