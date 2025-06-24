@@ -3,9 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { useToast } from '../components/ToastNotification';
+import { useRouter } from 'next/navigation';
 
 // Interfaces matching backend DTOs
 interface Category {
@@ -58,11 +57,11 @@ interface UpdateProductDto {
 }
 
 // API base URL
+// const API_URL = 'http://localhost:5001';
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Main Admin Panel Component
 const AdminPanel = () => {
-  const { showToast } = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -85,60 +84,24 @@ const AdminPanel = () => {
     },
   });
 
-  // Get token
-  const getToken = () => {
-    return document.cookie
-      .split('; ')
-      .find((row) => row.startsWith('accessToken='))
-      ?.split('=')[1];
-  };
-
-  // Fetch categories
-  const fetchCategories = async () => {
-    const token = getToken();
-    try {
-      const response = await axios.get(`${API_URL}/categories`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setCategories(response.data);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      setError('Failed to fetch categories');
-      showToast('Failed to fetch categories', 'error');
-    }
-  };
-
-  // Fetch products
-  const fetchProducts = async () => {
-    const token = getToken();
-    try {
-      const response = await axios.get(`${API_URL}/products`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setProducts(response.data);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      setError('Failed to fetch products');
-      showToast('Failed to fetch products', 'error');
-    }
-  };
-
   // Check access and authentication
   useEffect(() => {
     // Verify access from /profileAdmin
     const hasAdminAccess = sessionStorage.getItem('adminAccess') === 'true';
     if (!hasAdminAccess) {
       console.log('AdminPanel: Unauthorized access, redirecting to /login');
-      showToast('Unauthorized access', 'error');
       router.push('/login');
       return;
     }
 
     // Get token
-    const token = getToken();
+    const token = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('accessToken='))
+      ?.split('=')[1];
+
     if (!token) {
       console.log('AdminPanel: No token, redirecting to /login');
-      showToast('No authentication token found', 'error');
       sessionStorage.removeItem('adminAccess');
       router.push('/login');
       return;
@@ -152,26 +115,61 @@ const AdminPanel = () => {
         });
         if (res.data.email !== 'shahkamalakonda@gmail.com') {
           console.log('AdminPanel: Not admin user, redirecting to /login');
-          showToast('Access denied: Not an admin user', 'error');
           sessionStorage.removeItem('adminAccess');
           router.push('/login');
         }
       } catch (err) {
         console.error('AdminPanel: Failed to verify user:', err);
-        showToast('Failed to verify user', 'error');
         sessionStorage.removeItem('adminAccess');
         router.push('/login');
       }
     };
 
     verifyUser();
+  }, [router]);
+
+  // Fetch data on mount
+  useEffect(() => {
+    const token = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('accessToken='))
+      ?.split('=')[1];
+
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/categories`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCategories(response.data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        setError('Failed to fetch categories');
+      }
+    };
+
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/products`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setProducts(response.data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setError('Failed to fetch products');
+      }
+    };
+
     fetchCategories();
     fetchProducts();
-  }, [router]);
+  }, []);
 
   // Handle category image upload
   const uploadCategoryImage = async (file: File) => {
-    const token = getToken();
+    const token = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('accessToken='))
+      ?.split('=')[1];
+
     const formData = new FormData();
     formData.append('file', file);
     try {
@@ -181,20 +179,21 @@ const AdminPanel = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log('Category image upload response:', response.data); // Log response for debugging
-      showToast('Category image uploaded successfully', 'success');
       return response.data.url;
     } catch (error) {
       console.error('Error uploading category image:', error);
       setError('Failed to upload category image');
-      showToast('Failed to upload category image', 'error');
       return null;
     }
   };
 
   // Handle product image upload
   const uploadProductImage = async (file: File) => {
-    const token = getToken();
+    const token = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('accessToken='))
+      ?.split('=')[1];
+
     const formData = new FormData();
     formData.append('file', file);
     try {
@@ -204,20 +203,21 @@ const AdminPanel = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log('Product image upload response:', response.data); // Log response for debugging
-      showToast('Product image uploaded successfully', 'success');
       return response.data.url;
     } catch (error) {
       console.error('Error uploading product image:', error);
       setError('Failed to upload product image');
-      showToast('Failed to upload product image', 'error');
       return null;
     }
   };
 
   // Create or update category
   const handleCategorySubmit = async (data: CreateCategoryDto | UpdateCategoryDto) => {
-    const token = getToken();
+    const token = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('accessToken='))
+      ?.split('=')[1];
+
     let imageUrl = data.image;
     if (categoryImage) {
       imageUrl = await uploadCategoryImage(categoryImage);
@@ -233,7 +233,6 @@ const AdminPanel = () => {
         );
         setCategories(categories.map((cat) => (cat.id === editingCategory.id ? response.data : cat)));
         setEditingCategory(null);
-        showToast('Category updated successfully', 'success');
       } else {
         const response = await axios.post(
           `${API_URL}/categories`,
@@ -241,21 +240,22 @@ const AdminPanel = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setCategories([...categories, response.data]);
-        showToast('Category created successfully', 'success');
       }
       categoryForm.reset();
       setCategoryImage(null);
-      await fetchCategories(); // Refetch categories to ensure state sync
     } catch (error) {
       console.error('Error saving category:', error);
       setError('Failed to save category');
-      showToast('Failed to save category', 'error');
     }
   };
 
   // Create or update product
   const handleProductSubmit = async (data: CreateProductDto | UpdateProductDto) => {
-    const token = getToken();
+    const token = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('accessToken='))
+      ?.split('=')[1];
+
     let imageUrl = data.image;
     if (productImage) {
       imageUrl = await uploadProductImage(productImage);
@@ -271,7 +271,6 @@ const AdminPanel = () => {
         );
         setProducts(products.map((prod) => (prod.id === editingProduct.id ? response.data : prod)));
         setEditingProduct(null);
-        showToast('Product updated successfully', 'success');
       } else {
         const response = await axios.post(
           `${API_URL}/products`,
@@ -279,15 +278,12 @@ const AdminPanel = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setProducts([...products, response.data]);
-        showToast('Product created successfully', 'success');
       }
       productForm.reset();
       setProductImage(null);
-      await fetchProducts(); // Refetch products to ensure state sync
     } catch (error) {
       console.error('Error saving product:', error);
       setError('Failed to save product');
-      showToast('Failed to save product', 'error');
     }
   };
 
@@ -299,18 +295,19 @@ const AdminPanel = () => {
 
   // Delete category
   const deleteCategory = async (id: number) => {
-    const token = getToken();
+    const token = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('accessToken='))
+      ?.split('=')[1];
+
     try {
       await axios.delete(`${API_URL}/categories/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCategories(categories.filter((cat) => cat.id !== id));
-      showToast('Category deleted successfully', 'success');
-      await fetchCategories(); // Refetch categories to ensure state sync
     } catch (error) {
       console.error('Error deleting category:', error);
       setError('Failed to delete category');
-      showToast('Failed to delete category', 'error');
     }
   };
 
@@ -330,18 +327,19 @@ const AdminPanel = () => {
 
   // Delete product
   const deleteProduct = async (id: number) => {
-    const token = getToken();
+    const token = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('accessToken='))
+      ?.split('=')[1];
+
     try {
       await axios.delete(`${API_URL}/products/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(products.filter((prod) => prod.id !== id));
-      showToast('Product deleted successfully', 'success');
-      await fetchProducts(); // Refetch products to ensure state sync
     } catch (error) {
       console.error('Error deleting product:', error);
       setError('Failed to delete product');
-      showToast('Failed to delete product', 'error');
     }
   };
 
@@ -403,17 +401,13 @@ const AdminPanel = () => {
             <div key={category.id} className="bg-white p-4 rounded-lg shadow-md">
               <h3 className="text-lg font-semibold">{category.name}</h3>
               {category.image && (
-                <>
-                  {console.log('Category image URL:', `${API_URL}${category.image}`)} {/* Log URL for debugging */}
-                  <Image
-                    src={`${API_URL}${category.image}`}
-                    alt={category.name}
-                    width={100}
-                    height={100}
-                    className="mt-2 rounded-md"
-                    onError={() => showToast(`Failed to load image for ${category.name}`, 'error')}
-                  />
-                </>
+                <Image
+                  src={`${API_URL}${category.image}`}
+                  alt={category.name}
+                  width={100}
+                  height={100}
+                  className="mt-2 rounded-md"
+                />
               )}
               <div className="mt-4 flex space-x-2">
                 <button
@@ -544,23 +538,19 @@ const AdminPanel = () => {
         {/* Products List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((product) => (
-            <div key={product.id} className="bg-white Municipio p-4 rounded-lg shadow-md">
+            <div key={product.id} className="bg-white p-4 rounded-lg shadow-md">
               <h3 className="text-lg font-semibold">{product.name}</h3>
               <p className="text-gray-600">{product.description}</p>
               <p className="text-gray-600">Price: ${product.price}</p>
               <p className="text-gray-600">Quantity: {product.quantity} {product.quantityUnit}</p>
               {product.image && (
-                <>
-                  {console.log('Product image URL:', `${API_URL}${product.image}`)} {/* Log URL for debugging */}
-                  <Image
-                    src={`${API_URL}${product.image}`}
-                    alt={product.name}
-                    width={100}
-                    height={100}
-                    className="mt-2 rounded-md"
-                    onError={() => showToast(`Failed to load image for ${product.name}`, 'error')}
-                  />
-                </>
+                <Image
+                  src={`${API_URL}${product.image}`}
+                  alt={product.name}
+                  width={100}
+                  height={100}
+                  className="mt-2 rounded-md"
+                />
               )}
               <div className="mt-4 flex space-x-2">
                 <button
