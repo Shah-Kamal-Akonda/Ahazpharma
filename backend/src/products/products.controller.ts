@@ -10,14 +10,14 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 
 // import for change the image uploads 
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+// import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService,
 
     // controller use for change image uploads
-      private readonly cloudinaryService: CloudinaryService,
+      // private readonly cloudinaryService: CloudinaryService,
 
 
   ) {}
@@ -29,32 +29,32 @@ export class ProductsController {
     return this.productsService.create(createProductDto);
   }
 
-  //    @Post('upload')
-  // @UseInterceptors(
-  //   FileInterceptor('file', {
-  //     storage: diskStorage({
-  //       destination: './uploads/products',
-  //       filename: (req, file, cb) => {
-  //         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-  //         cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
-  //       },
-  //     }),
-  //   }),
-  // )
-  // uploadProductImage(@UploadedFile() file: Express.Multer.File) {
-  //   return { filename: file.filename, url: `/uploads/products/${file.filename}` };
-  // }
+     @Post('upload')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/products',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  uploadProductImage(@UploadedFile() file: Express.Multer.File) {
+    return { filename: file.filename, url: `/uploads/products/${file.filename}` };
+  }
 
 
 
   //  for upload in cloudinary image
 
-  @Post('upload')
-@UseInterceptors(FileInterceptor('file'))
-async uploadProductImage(@UploadedFile() file: Express.Multer.File) {
-  const imageUrl = await this.cloudinaryService.uploadImage(file);
-  return { url: imageUrl };
-}
+//   @Post('upload')
+// @UseInterceptors(FileInterceptor('file'))
+// async uploadProductImage(@UploadedFile() file: Express.Multer.File) {
+//   const imageUrl = await this.cloudinaryService.uploadImage(file);
+//   return { url: imageUrl };
+// }
 
 
 

@@ -6,12 +6,11 @@ import { Product } from './entities/product.entity';
 import { Category } from './entities/category.entity';
 import { CategoriesModule } from 'src/categories/categories.module';
 
-//for upload image in cloudinary
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+
 
 @Module({
   imports: [TypeOrmModule.forFeature([Product, Category]), CategoriesModule],
   controllers: [ProductsController],
-  providers: [ProductsService,CloudinaryService],
+  providers: [ProductsService],
 })
 export class ProductsModule {}
