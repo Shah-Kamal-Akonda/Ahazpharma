@@ -105,10 +105,9 @@ const CategoryProductsPage = () => {
       const response = await axios.get(`${API_URL}/orders/addresses`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setAddresses(response.data);
-      if (response.data.length > 0) {
-        setSelectedAddress(response.data[0]);
-      }
+      const fetchedAddresses = response.data;
+      setAddresses(fetchedAddresses);
+      return fetchedAddresses; // Return fetched addresses for use in handleAddressSubmit
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         console.error('Error fetching addresses:', err.message, err.response?.data);
@@ -117,6 +116,7 @@ const CategoryProductsPage = () => {
         console.error('Error fetching addresses:', err);
         setAddresses([]);
       }
+      return [];
     }
   };
 
@@ -140,7 +140,11 @@ const CategoryProductsPage = () => {
       fetchCategoryName(Number(id));
       const token = getAccessToken();
       if (token) {
-        fetchAddresses();
+        fetchAddresses().then((fetchedAddresses) => {
+          if (fetchedAddresses.length > 0 && !selectedAddress) {
+            setSelectedAddress(fetchedAddresses[0]);
+          }
+        });
       }
     }
   }, [id]);
@@ -388,6 +392,8 @@ const CategoryProductsPage = () => {
     email: string;
   }) => {
     try {
+      setIsLoading(true);
+      setErrorMessage(null);
       const token = getAccessToken();
       if (!token) {
         setErrorMessage('Please log in to save address.');
@@ -398,18 +404,36 @@ const CategoryProductsPage = () => {
       const response = await axios.post(`${API_URL}/users/address`, addressData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setAddresses([...addresses, response.data]);
-      setSelectedAddress(response.data);
+      const newAddress = response.data;
+      // Fetch updated addresses and ensure the new address is included
+      const updatedAddresses = await fetchAddresses();
+      // Find the newly saved address in the updated list (match by unique fields)
+      const savedAddress = updatedAddresses.find(
+        (addr: Address) =>
+          addr.division === addressData.division &&
+          addr.district === addressData.district &&
+          addr.city === addressData.city &&
+          addr.addressLine === addressData.addressLine &&
+          addr.recipientName === addressData.recipientName &&
+          addr.phoneNumber === addressData.phoneNumber &&
+          addr.email === addressData.email
+      ) || newAddress;
+      setSelectedAddress(savedAddress); // Set the newly saved address as selected
       setIsAddressModalOpen(false);
       setIsOrderModalOpen(true);
+      showToast('Address saved successfully!', 'success');
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         console.error('Error saving address:', err.message, err.response?.data);
         setErrorMessage('Failed to save address. Please try again.');
+        showToast('Failed to save address. Please try again.', 'error');
       } else {
         console.error('Error saving address:', err);
         setErrorMessage('An unexpected error occurred.');
+        showToast('An unexpected error occurred.', 'error');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -1036,12 +1060,85 @@ const CategoryProductsPage = () => {
       )}
 
       {isOrderModalOpen && selectedAddress && (
-        <OrderPopup
-          cart={cart}
-          address={selectedAddress}
-          onConfirm={handleConfirmOrder}
-          onClose={() => setIsOrderModalOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="relative bg-white/95 rounded-xl shadow-xl p-4 sm:p-6 w-full max-w-[90vw] sm:max-w-md max-h-[70vh] overflow-y-auto">
+            <button
+              onClick={() => setIsOrderModalOpen(false)}
+              className="absolute top-2 right-2 text-gray-600 hover:text-gray-800 z-10"
+            >
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h2 className="text-lg sm:text-xl font-bold text-center text-gray-800 mb-3 sm:mb-4">Order Summary</h2>
+            <div className="mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">Items</h3>
+              <ul className="divide-y divide-gray-200 text-sm sm:text-base">
+                {cart.map((item) => (
+                  <li key={item.product.id} className="py-2">
+                    <p>
+                      {item.product.name} (x{item.quantity}) - ${(item.product.price * item.quantity).toFixed(2)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-base sm:text-lg font-semibold text-gray-800 mt-2">
+                Total: ${cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0).toFixed(2)}
+              </p>
+            </div>
+            <div className="mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">Shipping Address</h3>
+              <div className="text-sm sm:text-base space-y-1">
+                <p>{selectedAddress.recipientName}</p>
+                <p>{selectedAddress.addressLine}</p>
+                <p>{selectedAddress.city}, {selectedAddress.district}, {selectedAddress.division}</p>
+                <p>Phone: {selectedAddress.phoneNumber}</p>
+                <p>Email: {selectedAddress.email}</p>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-2 sm:space-y-0">
+              <button
+                onClick={handleConfirmOrder}
+                className="w-full bg-green-600 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-green-700 transition-all duration-200 font-medium text-sm sm:text-base disabled:bg-green-400 disabled:cursor-not-allowed"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center">
+                    <svg
+                      className="animate-spin h-4 w-4 mr-2 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Confirming...
+                  </span>
+                ) : (
+                  'Confirm Order'
+                )}
+              </button>
+              <button
+                onClick={() => setIsOrderModalOpen(false)}
+                className="w-full bg-gray-300 text-gray-800 px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-gray-400 transition-all duration-200 font-medium text-sm sm:text-base"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">

@@ -99,53 +99,55 @@ export default function OrderSummaryPage({ params }: OrderPageProps) {
   };
 
   if (isLoading) {
-    return <div className="min-h-screen bg-gray-100 p-6 text-center">Loading...</div>;
+    return <div className="min-h-screen bg-gray-100 p-4 text-center text-sm sm:text-base">Loading...</div>;
   }
 
   if (error) {
-    return <div className="min-h-screen bg-gray-100 p-6 text-red-600 text-center">{error}</div>;
+    return <div className="min-h-screen bg-gray-100 p-4 text-red-600 text-center text-sm sm:text-base">{error}</div>;
   }
 
   if (!order) {
-    return <div className="min-h-screen bg-gray-100 p-6 text-center">Order not found</div>;
+    return <div className="min-h-screen bg-gray-100 p-4 text-center text-sm sm:text-base">Order not found</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold text-center mb-8">Order Summary</h1>
-      <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <p className="mb-2"><strong>Order ID:</strong> {order.id}</p>
-        <p className="mb-2"><strong>Date:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
-        <p className="mb-2"><strong>Status:</strong> {order.status}</p>
-        <h2 className="text-xl font-semibold mt-4 mb-2">Items</h2>
-        <ul className="divide-y divide-gray-200 mb-4">
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-6">
+      <h1 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8">Order Summary</h1>
+      <div className="max-w-[90vw] sm:max-w-2xl mx-auto bg-white p-4 sm:p-6 rounded-lg shadow-md max-h-[80vh] overflow-y-auto">
+        <p className="mb-2 text-sm sm:text-base"><strong>Order ID:</strong> {order.id}</p>
+        <p className="mb-2 text-sm sm:text-base"><strong>Date:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
+        <p className="mb-2 text-sm sm:text-base"><strong>Status:</strong> {order.status}</p>
+        <h2 className="text-lg sm:text-xl font-semibold mt-4 sm:mt-6 mb-2">Items</h2>
+        <ul className="divide-y divide-gray-200 mb-4 space-y-2 sm:space-y-4">
           {order.items.map((item) => (
-            <li key={item.productId} className="py-2">
+            <li key={item.productId} className="py-2 text-sm sm:text-base">
               <p>
                 {item.name} (x{item.quantity}) - ${(item.price * item.quantity).toFixed(2)}
               </p>
             </li>
           ))}
         </ul>
-        <p className="text-lg font-semibold">Total: ${order.total.toFixed(2)}</p>
-        <h2 className="text-xl font-semibold mt-6 mb-2">Shipping Address</h2>
-        <p>{order.recipientName}</p>
-        <p>{order.addressLine}</p>
-        <p>
-          {order.city}, {order.district}, {order.division}
-        </p>
-        <p>Phone: {order.phoneNumber}</p>
-        <p>Email: {order.email}</p>
-        <div className="mt-6 flex space-x-4">
+        <p className="text-base sm:text-lg font-semibold mb-4 sm:mb-6">Total: ${order.total.toFixed(2)}</p>
+        <h2 className="text-lg sm:text-xl font-semibold mb-2">Shipping Address</h2>
+        <div className="space-y-1 text-sm sm:text-base">
+          <p>{order.recipientName}</p>
+          <p>{order.addressLine}</p>
+          <p>
+            {order.city}, {order.district}, {order.division}
+          </p>
+          <p>Phone: {order.phoneNumber}</p>
+          <p>Email: {order.email}</p>
+        </div>
+        <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
           <Link
             href="/"
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+            className="bg-blue-500 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-blue-600 transition shadow-sm hover:shadow-md text-sm sm:text-base text-center"
           >
             Continue Shopping
           </Link>
           <button
             onClick={handleDownloadPDF}
-            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
+            className="bg-green-500 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-green-600 transition shadow-sm hover:shadow-md text-sm sm:text-base disabled:bg-green-300 disabled:cursor-not-allowed"
             disabled={!order}
           >
             Download LaTeX
