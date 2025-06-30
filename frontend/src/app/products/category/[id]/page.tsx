@@ -1141,41 +1141,41 @@ const CategoryProductsPage = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
         {products.map((product) => {
           const cartItem = cart.find((item) => item.product.id === product.id);
           return (
             <div
               key={product.id}
-              className="bg-white p-4 sm:p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              className="bg-white p-3 sm:p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-poppins min-h-[240px] max-h-[240px] sm:min-h-0 sm:max-h-none flex flex-col"
             >
               {product.image ? (
-                <div className="relative w-full h-40 sm:h-48 mb-3 sm:mb-4">
+                <div className="relative w-full h-28 sm:h-48 mb-2 sm:mb-4 overflow-hidden rounded-lg">
                   <Image
                     src={`${API_URL}${product.image}`}
                     alt={product.name}
                     fill
-                    className="object-cover rounded-lg"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 </div>
               ) : (
-                <div className="w-full h-40 sm:h-48 mb-3 sm:mb-4 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-500 text-sm sm:text-base">No Image</span>
+                <div className="w-full h-28 sm:h-48 mb-2 sm:mb-4 bg-gray-200 rounded-lg flex items-center justify-center">
+                  <span className="text-gray-500 text-[10px] sm:text-base">No Image</span>
                 </div>
               )}
-              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">{product.name}</h3>
-              <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2">{product.description}</p>
-              <p className="text-base sm:text-lg font-semibold text-blue-600 mb-2">${product.price.toFixed(2)}</p>
-              <p className="text-gray-500 text-xs sm:text-sm mb-3 sm:mb-4">
+              <h3 className="text-base sm:text-xl font-bold text-gray-800 mb-1 sm:mb-2 line-clamp-1 sm:line-clamp-none">{product.name}</h3>
+              <p className="text-gray-600 text-[10px] sm:text-sm mb-1 sm:mb-3 line-clamp-2">{product.description}</p>
+              <p className="text-sm sm:text-lg font-semibold text-blue-600 mb-1">${product.price.toFixed(2)}</p>
+              <p className="text-gray-500 text-[10px] sm:text-sm mb-1 sm:mb-4">
                 Quantity: {product.quantity} {product.quantityUnit}
               </p>
-              <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="flex items-center space-x-2 sm:space-x-3 mt-auto">
                 {cartItem ? (
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => updateCartQuantity(product.id, -1)}
-                      className="bg-gray-200 text-gray-700 px-2 sm:px-3 py-1 sm:py-2 rounded-full hover:bg-gray-300 transition-colors duration-200 text-sm sm:text-base"
+                      className="bg-gray-200 text-gray-700 px-2 sm:px-3 py-1 sm:py-2 rounded-full hover:bg-gray-300 transition-colors duration-200 text-xs sm:text-base"
                     >
                       -
                     </button>
@@ -1184,7 +1184,7 @@ const CategoryProductsPage = () => {
                     </span>
                     <button
                       onClick={() => updateCartQuantity(product.id, 1)}
-                      className="bg-gray-200 text-gray-700 px-2 sm:px-3 py-1 sm:py-2 rounded-full hover:bg-gray-300 transition-colors duration-200 text-sm sm:text-base"
+                      className="bg-gray-200 text-gray-700 px-2 sm:px-3 py-1 sm:py-2 rounded-full hover:bg-gray-300 transition-colors duration-200 text-xs sm:text-base"
                     >
                       +
                     </button>
@@ -1192,7 +1192,7 @@ const CategoryProductsPage = () => {
                 ) : (
                   <button
                     onClick={() => addToCart(product)}
-                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold text-sm sm:text-base"
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold text-xs sm:text-base"
                   >
                     Add to Cart
                   </button>
