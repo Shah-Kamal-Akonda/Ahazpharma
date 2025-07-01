@@ -50,6 +50,7 @@ export default function UserProfile() {
   });
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -74,6 +75,7 @@ export default function UserProfile() {
     }
 
     try {
+      setIsLoading(true);
       const res = await axios.get(`${API_URL}/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -96,12 +98,15 @@ export default function UserProfile() {
         showToast('An unexpected error occurred', 'error');
       }
       router.push('/login');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     const fetchDivisions = async () => {
       try {
+        setIsLoading(true);
         const res = await axios.get(`${API_URL}/users/divisions`);
         setDivisions(res.data);
       } catch (err: unknown) {
@@ -114,6 +119,8 @@ export default function UserProfile() {
           setError('An unexpected error occurred');
           showToast('An unexpected error occurred', 'error');
         }
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -136,6 +143,7 @@ export default function UserProfile() {
     }
 
     try {
+      setIsLoading(true);
       await axios.post(`${API_URL}/users/profile`, updateData, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -151,6 +159,8 @@ export default function UserProfile() {
         setError('An unexpected error occurred');
         showToast('An unexpected error occurred', 'error');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -171,6 +181,7 @@ export default function UserProfile() {
 
   const fetchDistricts = async (division: string) => {
     try {
+      setIsLoading(true);
       const res = await axios.get(`${API_URL}/users/districts/${division}`);
       setDistricts(res.data);
     } catch (err: unknown) {
@@ -183,11 +194,14 @@ export default function UserProfile() {
         setError('An unexpected error occurred');
         showToast('An unexpected error occurred', 'error');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const fetchCities = async (division: string, district: string) => {
     try {
+      setIsLoading(true);
       const res = await axios.get(`${API_URL}/users/cities/${division}/${district}`);
       setCities(res.data);
     } catch (err: unknown) {
@@ -200,6 +214,8 @@ export default function UserProfile() {
         setError('An unexpected error occurred');
         showToast('An unexpected error occurred', 'error');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -214,6 +230,7 @@ export default function UserProfile() {
     }
 
     try {
+      setIsLoading(true);
       await axios.post(`${API_URL}/users/address`, newAddress, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -238,6 +255,8 @@ export default function UserProfile() {
         setError('An unexpected error occurred');
         showToast('An unexpected error occurred', 'error');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -260,6 +279,7 @@ export default function UserProfile() {
     }
 
     try {
+      setIsLoading(true);
       await axios.put(`${API_URL}/users/address/${editingAddress.id}`, newAddress, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -285,6 +305,8 @@ export default function UserProfile() {
         setError('An unexpected error occurred');
         showToast('An unexpected error occurred', 'error');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -298,6 +320,7 @@ export default function UserProfile() {
     }
 
     try {
+      setIsLoading(true);
       await axios.delete(`${API_URL}/users/address/${addressId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -313,6 +336,8 @@ export default function UserProfile() {
         setError('An unexpected error occurred');
         showToast('An unexpected error occurred', 'error');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -378,8 +403,38 @@ export default function UserProfile() {
               <option value="other">Other</option>
             </select>
           </div>
-          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Update Profile
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <span className="flex items-center">
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Updating...
+              </span>
+            ) : (
+              'Update Profile'
+            )}
           </button>
         </form>
       </div>
@@ -485,9 +540,36 @@ export default function UserProfile() {
           </div>
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
+            disabled={isLoading}
           >
-            {editingAddress ? 'Update Address' : 'Create Address'}
+            {isLoading ? (
+              <span className="flex items-center">
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                {editingAddress ? 'Updating...' : 'Creating...'}
+              </span>
+            ) : (
+              editingAddress ? 'Update Address' : 'Create Address'
+            )}
           </button>
           {editingAddress && (
             <button
@@ -524,15 +606,69 @@ export default function UserProfile() {
                 <div className="mt-2 space-x-2">
                   <button
                     onClick={() => handleEditAddress(address)}
-                    className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                    className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 disabled:bg-yellow-300 disabled:cursor-not-allowed"
+                    disabled={isLoading}
                   >
-                    Edit
+                    {isLoading ? (
+                      <span className="flex items-center">
+                        <svg
+                          className="animate-spin h-5 w-5 mr-2 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Editing...
+                      </span>
+                    ) : (
+                      'Edit'
+                    )}
                   </button>
                   <button
                     onClick={() => handleDeleteAddress(address.id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 disabled:bg-red-300 disabled:cursor-not-allowed"
+                    disabled={isLoading}
                   >
-                    Delete
+                    {isLoading ? (
+                      <span className="flex items-center">
+                        <svg
+                          className="animate-spin h-5 w-5 mr-2 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Deleting...
+                      </span>
+                    ) : (
+                      'Delete'
+                    )}
                   </button>
                 </div>
               </div>

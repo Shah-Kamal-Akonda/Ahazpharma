@@ -443,6 +443,7 @@ const SearchResultsClient: React.FC<SearchResultsClientProps> = ({ initialQuery 
       return;
     }
     try {
+      setIsLoading(true); // Add this line for show loading sign
       const token = getAccessToken();
       if (!token) {
         setErrorMessage('Please log in to place an order.');
@@ -481,6 +482,9 @@ const SearchResultsClient: React.FC<SearchResultsClientProps> = ({ initialQuery 
         showToast('An unexpected error occurred.', 'error');
       }
     }
+    finally {
+    setIsLoading(false); // for loading sign false
+  }
   };
 
   return (

@@ -489,6 +489,7 @@ const ProductsPage = () => {
       return;
     }
     try {
+      setIsLoading(true);
       const token = getAccessToken();
       if (!token) {
         setErrorMessage('Please log in to place an order.');
@@ -526,6 +527,8 @@ const ProductsPage = () => {
         setErrorMessage('An unexpected error occurred.');
         showToast('An unexpected error occurred.', 'error');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 

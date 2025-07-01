@@ -443,6 +443,7 @@ const CategoryProductsPage = () => {
       return;
     }
     try {
+      setIsLoading(true); // Add this line for show loading sign
       const token = getAccessToken();
       if (!token) {
         setErrorMessage('Please log in to place an order.');
@@ -477,6 +478,9 @@ const CategoryProductsPage = () => {
         setErrorMessage('An unexpected error occurred.');
       }
     }
+    finally {
+    setIsLoading(false); // for loading sign false
+  }
   };
 
   return (
