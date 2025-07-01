@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
@@ -70,7 +70,10 @@ const AdminPanel = () => {
   const [categoryImage, setCategoryImage] = useState<File | null>(null);
   const [productImage, setProductImage] = useState<File | null>(null);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const categoryFormRef = useRef<HTMLFormElement>(null);
+  const productFormRef = useRef<HTMLFormElement>(null);
 
   // Form hooks
   const categoryForm = useForm<CreateCategoryDto | UpdateCategoryDto>({ defaultValues: { name: '' } });
@@ -97,6 +100,7 @@ const AdminPanel = () => {
   const fetchCategories = async () => {
     const token = getToken();
     try {
+      setIsLoading(true);
       const response = await axios.get(`${API_URL}/categories`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -105,6 +109,8 @@ const AdminPanel = () => {
       console.error('Error fetching categories:', error);
       setError('Failed to fetch categories');
       showToast('Failed to fetch categories', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -112,6 +118,7 @@ const AdminPanel = () => {
   const fetchProducts = async () => {
     const token = getToken();
     try {
+      setIsLoading(true);
       const response = await axios.get(`${API_URL}/products`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -120,6 +127,8 @@ const AdminPanel = () => {
       console.error('Error fetching products:', error);
       setError('Failed to fetch products');
       showToast('Failed to fetch products', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -147,6 +156,7 @@ const AdminPanel = () => {
     // Verify admin user
     const verifyUser = async () => {
       try {
+        setIsLoading(true);
         const res = await axios.get(`${API_URL}/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -161,6 +171,8 @@ const AdminPanel = () => {
         showToast('Failed to verify user', 'error');
         sessionStorage.removeItem('adminAccess');
         router.push('/login');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -175,6 +187,7 @@ const AdminPanel = () => {
     const formData = new FormData();
     formData.append('file', file);
     try {
+      setIsLoading(true);
       const response = await axios.post(`${API_URL}/categories/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -189,6 +202,8 @@ const AdminPanel = () => {
       setError('Failed to upload category image');
       showToast('Failed to upload category image', 'error');
       return null;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -198,6 +213,7 @@ const AdminPanel = () => {
     const formData = new FormData();
     formData.append('file', file);
     try {
+      setIsLoading(true);
       const response = await axios.post(`${API_URL}/products/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -212,6 +228,8 @@ const AdminPanel = () => {
       setError('Failed to upload product image');
       showToast('Failed to upload product image', 'error');
       return null;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -225,6 +243,7 @@ const AdminPanel = () => {
     }
 
     try {
+      setIsLoading(true);
       if (editingCategory) {
         const response = await axios.put(
           `${API_URL}/categories/${editingCategory.id}`,
@@ -250,6 +269,8 @@ const AdminPanel = () => {
       console.error('Error saving category:', error);
       setError('Failed to save category');
       showToast('Failed to save category', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -263,6 +284,7 @@ const AdminPanel = () => {
     }
 
     try {
+      setIsLoading(true);
       if (editingProduct) {
         const response = await axios.put(
           `${API_URL}/products/${editingProduct.id}`,
@@ -288,6 +310,8 @@ const AdminPanel = () => {
       console.error('Error saving product:', error);
       setError('Failed to save product');
       showToast('Failed to save product', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -295,12 +319,16 @@ const AdminPanel = () => {
   const editCategory = (category: Category) => {
     setEditingCategory(category);
     categoryForm.reset({ name: category.name, image: category.image });
+    if (categoryFormRef.current) {
+      categoryFormRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   // Delete category
   const deleteCategory = async (id: number) => {
     const token = getToken();
     try {
+      setIsLoading(true);
       await axios.delete(`${API_URL}/categories/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -311,6 +339,8 @@ const AdminPanel = () => {
       console.error('Error deleting category:', error);
       setError('Failed to delete category');
       showToast('Failed to delete category', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -326,12 +356,16 @@ const AdminPanel = () => {
       image: product.image,
       categoryName: product.category?.name,
     });
+    if (productFormRef.current) {
+      productFormRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   // Delete product
   const deleteProduct = async (id: number) => {
     const token = getToken();
     try {
+      setIsLoading(true);
       await axios.delete(`${API_URL}/products/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -342,6 +376,8 @@ const AdminPanel = () => {
       console.error('Error deleting product:', error);
       setError('Failed to delete product');
       showToast('Failed to delete product', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -354,6 +390,7 @@ const AdminPanel = () => {
       <div className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Manage Categories</h2>
         <form
+          ref={categoryFormRef}
           onSubmit={categoryForm.handleSubmit(handleCategorySubmit)}
           className="bg-white p-6 rounded-lg shadow-md mb-6"
         >
@@ -379,9 +416,36 @@ const AdminPanel = () => {
           </div>
           <button
             type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:bg-blue-400 disabled:cursor-not-allowed"
+            disabled={isLoading}
           >
-            {editingCategory ? 'Update Category' : 'Add Category'}
+            {isLoading ? (
+              <span className="flex items-center">
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                {editingCategory ? 'Updating...' : 'Adding...'}
+              </span>
+            ) : (
+              editingCategory ? 'Update Category' : 'Add Category'
+            )}
           </button>
           {editingCategory && (
             <button
@@ -390,9 +454,36 @@ const AdminPanel = () => {
                 setEditingCategory(null);
                 categoryForm.reset();
               }}
-              className="ml-4 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+              className="ml-4 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled={isLoading}
             >
-              Cancel
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin h-5 w-5 mr-2 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Canceling...
+                </span>
+              ) : (
+                'Cancel'
+              )}
             </button>
           )}
         </form>
@@ -418,15 +509,69 @@ const AdminPanel = () => {
               <div className="mt-4 flex space-x-2">
                 <button
                   onClick={() => editCategory(category)}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600"
+                  className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600 disabled:bg-yellow-400 disabled:cursor-not-allowed"
+                  disabled={isLoading}
                 >
-                  Edit
+                  {isLoading ? (
+                    <span className="flex items-center">
+                      <svg
+                        className="animate-spin h-5 w-5 mr-2 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Editing...
+                    </span>
+                  ) : (
+                    'Edit'
+                  )}
                 </button>
                 <button
                   onClick={() => deleteCategory(category.id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
+                  className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 disabled:bg-red-400 disabled:cursor-not-allowed"
+                  disabled={isLoading}
                 >
-                  Delete
+                  {isLoading ? (
+                    <span className="flex items-center">
+                      <svg
+                        className="animate-spin h-5 w-5 mr-2 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Deleting...
+                    </span>
+                  ) : (
+                    'Delete'
+                  )}
                 </button>
               </div>
             </div>
@@ -438,6 +583,7 @@ const AdminPanel = () => {
       <div>
         <h2 className="text-2xl font-semibold mb-4">Manage Products</h2>
         <form
+          ref={productFormRef}
           onSubmit={productForm.handleSubmit(handleProductSubmit)}
           className="bg-white p-6 rounded-lg shadow-md mb-6"
         >
@@ -523,9 +669,36 @@ const AdminPanel = () => {
           </div>
           <button
             type="submit"
-            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:bg-blue-400 disabled:cursor-not-allowed"
+            disabled={isLoading}
           >
-            {editingProduct ? 'Update Product' : 'Add Product'}
+            {isLoading ? (
+              <span className="flex items-center">
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                {editingProduct ? 'Updating...' : 'Adding...'}
+              </span>
+            ) : (
+              editingProduct ? 'Update Product' : 'Add Product'
+            )}
           </button>
           {editingProduct && (
             <button
@@ -534,9 +707,36 @@ const AdminPanel = () => {
                 setEditingProduct(null);
                 productForm.reset();
               }}
-              className="ml-4 mt-4 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+              className="ml-4 mt-4 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled={isLoading}
             >
-              Cancel
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin h-5 w-5 mr-2 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Canceling...
+                </span>
+              ) : (
+                'Cancel'
+              )}
             </button>
           )}
         </form>
@@ -544,7 +744,7 @@ const AdminPanel = () => {
         {/* Products List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((product) => (
-            <div key={product.id} className="bg-white Municipio p-4 rounded-lg shadow-md">
+            <div key={product.id} className="bg-white p-4 rounded-lg shadow-md">
               <h3 className="text-lg font-semibold">{product.name}</h3>
               <p className="text-gray-600">{product.description}</p>
               <p className="text-gray-600">Price: ${product.price}</p>
@@ -565,15 +765,69 @@ const AdminPanel = () => {
               <div className="mt-4 flex space-x-2">
                 <button
                   onClick={() => editProduct(product)}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600"
+                  className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600 disabled:bg-yellow-400 disabled:cursor-not-allowed"
+                  disabled={isLoading}
                 >
-                  Edit
+                  {isLoading ? (
+                    <span className="flex items-center">
+                      <svg
+                        className="animate-spin h-5 w-5 mr-2 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Editing...
+                    </span>
+                  ) : (
+                    'Edit'
+                  )}
                 </button>
                 <button
                   onClick={() => deleteProduct(product.id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
+                  className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 disabled:bg-red-400 disabled:cursor-not-allowed"
+                  disabled={isLoading}
                 >
-                  Delete
+                  {isLoading ? (
+                    <span className="flex items-center">
+                      <svg
+                        className="animate-spin h-5 w-5 mr-2 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Deleting...
+                    </span>
+                  ) : (
+                    'Delete'
+                  )}
                 </button>
               </div>
             </div>
